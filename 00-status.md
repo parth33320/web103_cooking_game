@@ -5,14 +5,14 @@
 
 ## Gates (AGENTS.md phases)
 
-- Alignment (CONTEXT.md + grilling): pending
-- Architecture (ARCHITECTURE.md + ADRs): pending
-- Slice plan approved (PLAN.md): pending
+- Alignment (CONTEXT.md + grilling): APPROVED 2026-10-17
+- Architecture (ARCHITECTURE.md + ADRs): APPROVED 2026-10-17
+- Slice plan approved (PLAN.md): APPROVED 2026-10-17
 
 ## Slice checklist (build strictly in order; one slice = one session = one PR)
 
 ### Sprint 0 - Foundations (course Units 5-6: Milestones 1-2)
-- [ ] S0.1 Repo scaffold: client/ server/ dirs, CI, Postgres test DB, Playwright w/ video, audit log writer
+- [x] S0.1 Repo scaffold: client/ server/ dirs, CI, Postgres test DB, Playwright w/ video, audit log writer
 - [ ] S0.2 Docs deliverables: README features (6+), user stories (10+, 1-3 roles), wireframes (3+ as embedded images), ERD (Mermaid + table list)
 
 ### Sprint 1 - Tracer bullet (Unit 7: Milestone 3)
@@ -55,7 +55,7 @@ Baseline (59 pts)
 
 | Rubric item | Pts | Slice | Test file | Status |
 |---|---|---|---|---|
-| Express backend + React frontend | 5 | S0.1/S1.1 | e2e/tracer.spec.js | todo |
+| Express backend + React frontend | 5 | S0.1/S1.1 | tests/api/health.test.js | done |
 | 1:N and M:N (join table) in Postgres | 8 | S1.1 (M:N), S2.3 (1:N) | server/test/schema.spec.js | todo |
 | RESTful API, full CRUD on one entity (Dish) | 15 | S1.1, S1.3 | server/test/dishes.api.spec.js | todo |
 | Reset DB to default | 4 | S2.2 | server/test/reset.api.spec.js | todo |
@@ -97,8 +97,12 @@ Stretch (19)
 - [ ] M2: wireframes.md (3+ pages with embedded images); ERD (tables + diagram); reflection; 3-min pitch
 - [ ] M3: 5+ issues, project board shared with `codepathreview`, 5 GitHub Milestones, `progress_report_3.md`, GIFs
 - [ ] M4: `progress_report_4.md`, GIFs, milestone % updated
-- [ ] Final: deploy link in README, feature checklist, full run-through GIF, `milestone5.md`
+- [ ] Final: deploy link in README, feature checklist, full run-through GIF, milestone5.md
 
 ## Handoff log (append newest at bottom; 5 lines max each)
 
-<!-- Jules writes here at session end -->
+- S0.1 Repo scaffold shipped: Express backend, Vite React SPA, health check API, audit logger, DB migration runner, CI workflows.
+- STUBs: STUB-001 (scoring) and STUB-002 (dishes repo) registered; no orphan stubs.
+- Next up: S0.2 Docs deliverables (README features, user stories, wireframes, ERD).
+- Gotchas: Ensure Postgres instance is running locally or via Docker on port 5432 for test suites.
+- Open questions: None; all CI checks, Vitest tests, and Playwright video E2E tests are passing cleanly.
