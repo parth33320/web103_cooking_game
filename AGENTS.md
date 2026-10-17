@@ -1,3 +1,8 @@
+## Session Start Protocol (read first, every session)
+Before anything else read: CONTEXT.md, docs/STANDARDS.md, docs/plans/budget-bistro/00-status.md.
+Work only on the first unchecked slice. Never invent stubs; register them. Update 00-status.md before ending.
+If any instruction here conflicts with STANDARDS.md, STANDARDS.md wins for project rules; AGENTS.md wins for process.
+
 Elite Engineering SDLC: The Jules & Pocock Framework
 1. The Philosophical Foundation
 The Engineer (Jules): Executes the full SDLC using Real Engineering (predictable, disciplined, and deep) rather than "vibe coding" (stochastic, shallow, and inconsistent).
