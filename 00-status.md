@@ -21,7 +21,7 @@
 - [ ] S1.3 Dish CRUD complete + server validation (PATCH/DELETE; 400/404/409 paths)
 
 ### Sprint 2 - Economy and world (Unit 8: Milestone 4)
-- [ ] S2.1 Ingredient market: GET with filter + sort (category, price, protein)
+- [x] S2.1 Ingredient market: GET with filter + sort (category, price, protein)
 - [ ] S2.2 New game: auto-seed Kitchen/Wallet/starter data + `POST /api/game/reset`
 - [ ] S2.3 Customers + Order generator (seeded RNG), Order -> Reviews 1:N
 - [ ] S2.4 `POST /api/game/next-day`: events from curated library, new Orders, Rent
@@ -73,7 +73,7 @@ Custom (need 2; target 5 so two are safe)
 | POST/PATCH validated before DB write | 3 | S1.3 | server/test/validation.spec.js | todo |
 | Unique field in join table (`quantity_g`) | 3 | S1.1/S1.3 | tests/api/dishes.test.js | done |
 | Data auto-generated on event (new game seed) | 3 | S2.2 | server/test/newgame.spec.js | todo |
-| Filtering and/or sorting | 3 | S2.1 | server/test/market.api.spec.js | todo |
+| Filtering and/or sorting | 3 | S2.1 | tests/api/ingredients.test.js | done |
 | Non-RESTful route (`next-day`, `serve`) | 3 | S2.4 | server/test/nextday.api.spec.js | todo |
 | Slide-out/modal | 3 | S2.6 | e2e/modal.spec.js | todo |
 | Graceful error handling | 3 | S2.7 | e2e/errors.spec.js | todo |
@@ -106,3 +106,7 @@ Stretch (19)
 - S1.1 Tracer Bullet shipped: Order details, ingredient selection, dish creation via POST /api/dishes, stub scoring, and frontend CookPage.
 - Tests & Evidence: Unit, API, Security, and Playwright E2E tests green with video evidence in docs/evidence/S1.1/video.webm.
 - S1.2 Scoring Engine shipped: Real scoring rules (budget, macro penalties, blacklists, favorite bonus), Mulberry32 PRNG luck rolls, review text generation, and frontend score breakdown UI.
+- S2.1 Ingredient market shipped: GET /api/ingredients with category filtering and price/protein sorting (asc/desc), validated inputs, and security protection.
+- Frontend Market Page: Created MarketPage.jsx with filter chips, sort controls, and ingredient cards; added route /market in App.jsx.
+- Tests & Evidence: Vitest API & Security tests green, Playwright E2E test green with video/screenshot evidence in docs/evidence/S2.1/.
+- Quality & Verification: All 31 backend/unit tests pass, 4 Playwright E2E tests pass, standards-check and rubric-check pass cleanly.
