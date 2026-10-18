@@ -762,3 +762,5 @@
 {"timestamp":"2026-10-18T20:35:39.753Z","action":"GAME_RESET","details":{"playerId":1,"kitchenId":1}}
 {"timestamp":"2026-10-18T20:35:42.643Z","action":"HEALTH_CHECK","details":{"ip":"127.0.0.1"}}
 {"timestamp":"2026-10-18T20:35:43.232Z","action":"HEALTH_CHECK","details":{"ip":"127.0.0.1"}}
+{"timestamp":"2026-10-18T20:40:08.667Z","action":"HEALTH_CHECK","details":{"ip":"127.0.0.1"}}
+{"timestamp":"2026-10-18T20:40:09.235Z","action":"HEALTH_CHECK","details":{"ip":"127.0.0.1"}}

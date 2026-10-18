@@ -43,18 +43,20 @@ export async function resetDatabase() {
     await client.query('DELETE FROM kitchens');
     await client.query('DELETE FROM players');
 
-    // 1. Seed Default Player (without explicit ID so SERIAL sequence advances)
+    // 1. Seed Default Player with fixed ID = 1
     const playerRes = await client.query(
-      `INSERT INTO players (name)
-       VALUES ('Head Chef')
+      `INSERT INTO players (id, name)
+       VALUES (1, 'Head Chef')
+       ON CONFLICT (id) DO UPDATE SET name = 'Head Chef'
        RETURNING id, name, created_at`
     );
     const playerRow = playerRes.rows[0];
 
-    // 2. Seed Default Kitchen (without explicit ID so SERIAL sequence advances)
+    // 2. Seed Default Kitchen with fixed ID = 1
     const kitchenRes = await client.query(
-      `INSERT INTO kitchens (player_id, name, wallet, reputation, day, tier, xp)
-       VALUES ($1, 'Bistro Starter', 100.00, 50, 1, 1, 0)
+      `INSERT INTO kitchens (id, player_id, name, wallet, reputation, day, tier, xp)
+       VALUES (1, $1, 'Bistro Starter', 100.00, 50, 1, 1, 0)
+       ON CONFLICT (id) DO UPDATE SET player_id = $1, name = 'Bistro Starter', wallet = 100.00, reputation = 50, day = 1, tier = 1, xp = 0
        RETURNING id, player_id, name, wallet, reputation, day, tier, xp`,
       [playerRow.id]
     );
@@ -70,32 +72,46 @@ export async function resetDatabase() {
       ON CONFLICT (id) DO NOTHING
     `);
 
-    // 4. Seed Starter Customers (without explicit ID so SERIAL sequence advances)
+    // 4. Seed Starter Customers with fixed IDs = 1, 2
     const cust1Res = await client.query(`
-      INSERT INTO customers (name, job, diet, favorite_ingredient_id)
-      VALUES ('Alice the Athlete', 'Fitness Trainer', 'High Protein', 1)
+      INSERT INTO customers (id, name, job, diet, favorite_ingredient_id)
+      VALUES (1, 'Alice the Athlete', 'Fitness Trainer', 'High Protein', 1)
+      ON CONFLICT (id) DO UPDATE SET name = 'Alice the Athlete', job = 'Fitness Trainer', diet = 'High Protein', favorite_ingredient_id = 1
       RETURNING id, name
     `);
     const cust2Res = await client.query(`
-      INSERT INTO customers (name, job, diet, favorite_ingredient_id)
-      VALUES ('Bob the Builder', 'Construction Worker', 'High Carb', 2)
+      INSERT INTO customers (id, name, job, diet, favorite_ingredient_id)
+      VALUES (2, 'Bob the Builder', 'Construction Worker', 'High Carb', 2)
+      ON CONFLICT (id) DO UPDATE SET name = 'Bob the Builder', job = 'Construction Worker', diet = 'High Carb', favorite_ingredient_id = 2
       RETURNING id, name
     `);
 
-    // 5. Seed Starter Open Orders (without explicit ID so SERIAL sequence advances)
+    // 5. Seed Starter Open Orders with fixed IDs = 1, 2
     const order1Res = await client.query(`
-      INSERT INTO orders (kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, tolerance_pct, favorite_ingredient_id, status)
-      VALUES ($1, $2, 15.00, 30, 20, 5, 10, 1, 'open')
+      INSERT INTO orders (id, kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, tolerance_pct, favorite_ingredient_id, status)
+      VALUES (1, $1, $2, 15.00, 30, 20, 5, 10, 1, 'open')
+      ON CONFLICT (id) DO UPDATE SET kitchen_id = $1, customer_id = $2, budget = 15.00, target_protein_g = 30, target_carbs_g = 20, target_fat_g = 5, tolerance_pct = 10, favorite_ingredient_id = 1, status = 'open'
       RETURNING id, kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, tolerance_pct, status`,
       [kitchenRow.id, cust1Res.rows[0].id]
     );
 
     const order2Res = await client.query(`
-      INSERT INTO orders (kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, tolerance_pct, favorite_ingredient_id, status)
-      VALUES ($1, $2, 12.00, 15, 40, 10, 10, 2, 'open')
+      INSERT INTO orders (id, kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, tolerance_pct, favorite_ingredient_id, status)
+      VALUES (2, $1, $2, 12.00, 15, 40, 10, 10, 2, 'open')
+      ON CONFLICT (id) DO UPDATE SET kitchen_id = $1, customer_id = $2, budget = 12.00, target_protein_g = 15, target_carbs_g = 40, target_fat_g = 10, tolerance_pct = 10, favorite_ingredient_id = 2, status = 'open'
       RETURNING id, kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, tolerance_pct, status`,
       [kitchenRow.id, cust2Res.rows[0].id]
     );
+
+    try {
+      await client.query("SELECT setval('players_id_seq', (SELECT COALESCE(MAX(id), 1) FROM players))");
+      await client.query("SELECT setval('kitchens_id_seq', (SELECT COALESCE(MAX(id), 1) FROM kitchens))");
+      await client.query("SELECT setval('customers_id_seq', (SELECT COALESCE(MAX(id), 1) FROM customers))");
+      await client.query("SELECT setval('orders_id_seq', (SELECT COALESCE(MAX(id), 1) FROM orders))");
+      await client.query("SELECT setval('dishes_id_seq', (SELECT COALESCE(MAX(id), 1) FROM dishes))");
+    } catch (_) {
+      // ignore if sequences/setval not present
+    }
 
     await client.query('COMMIT');
 
