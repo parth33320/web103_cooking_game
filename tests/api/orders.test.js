@@ -9,6 +9,7 @@ describe('Orders and Reviews 1:N API (S2.3)', () => {
 
   beforeAll(async () => {
     await runMigrations();
+    await request(app).post('/api/game/reset').send();
   });
 
   it('GET /api/orders/1 returns customer profile details and reviews array', async () => {

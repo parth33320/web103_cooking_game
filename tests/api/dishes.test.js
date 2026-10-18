@@ -8,6 +8,7 @@ describe('Dishes API (S1.2 Scoring Engine)', () => {
 
   beforeAll(async () => {
     await runMigrations();
+    await request(app).post('/api/game/reset').send();
   });
 
   it('GET /api/orders/1 returns order and ingredients', async () => {

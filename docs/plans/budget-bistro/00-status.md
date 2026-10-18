@@ -111,6 +111,8 @@ Stretch (19)
 - Tests & Evidence: Vitest unit/API/security tests and Playwright E2E test green; screenshot and video in `docs/evidence/S2.3/`.
 - Next up: S2.4 `POST /api/game/next-day`: events from curated library, new Orders, Rent.
 - S2.4 Resolved PR #19 issues & verified test suite: route registration, validation order, seed data all confirmed working.
+- Test isolation fixed: seed reset added in beforeAll across dishes.test.js, dishes.security.test.js, and orders.test.js.
+- Validation reordered in patchDish controller to validate body lines before checking dish ID.
 - Test suite: 15 test files / 60 tests passing cleanly (`npm test`).
 - Standards and rubric checks pass cleanly (`npm run standards-check` and `npm run rubric-check`).
 - Next up: S2.5 Frontend routing complete: dashboard, market, cook page, dish page, redirect after serve.

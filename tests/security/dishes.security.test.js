@@ -8,6 +8,7 @@ describe('Dishes Security Tests', () => {
 
   beforeAll(async () => {
     await runMigrations();
+    await request(app).post('/api/game/reset').send();
   });
 
   it('handles bad request body gracefully', async () => {
