@@ -3,7 +3,7 @@ import request from 'supertest';
 import { createApp } from '../../server/src/app.js';
 import { runMigrations } from '../../server/src/db/migrate.js';
 
-describe('Dishes API (S1.1 Tracer Bullet)', () => {
+describe('Dishes API (S1.2 Scoring Engine)', () => {
   const app = createApp();
 
   beforeAll(async () => {
@@ -17,12 +17,15 @@ describe('Dishes API (S1.1 Tracer Bullet)', () => {
     expect(res.body.ingredients.length).toBeGreaterThan(0);
   });
 
-  it('POST /api/dishes creates dish and returns 3 stars (STUB-001)', async () => {
+  it('POST /api/dishes creates dish and returns breakdown + review from scoring engine', async () => {
     const res = await request(app)
       .post('/api/dishes')
-      .send({ orderId: 1, lines: [{ ingredientId: 1 }] });
+      .send({ orderId: 1, lines: [{ ingredientId: 1, quantityG: 100 }] });
     expect(res.status).toBe(201);
-    expect(res.body.stars).toBe(3);
+    expect(res.body.stars).toBeDefined();
     expect(res.body.dishId).toBeDefined();
+    expect(res.body.review).toBeDefined();
+    expect(res.body.breakdown).toBeDefined();
+    expect(res.body.breakdown.baseStars).toBe(5.0);
   });
 });

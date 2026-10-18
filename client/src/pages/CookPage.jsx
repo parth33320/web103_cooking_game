@@ -123,6 +123,23 @@ export function CookPage() {
             Stars: <strong id="star-rating">{'⭐'.repeat(Math.round(result.stars))} ({result.stars} Stars)</strong>
           </p>
           <p><em>"{result.review}"</em></p>
+
+          {result.breakdown && (
+            <div id="score-breakdown" style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: '#fff', borderRadius: '6px', fontSize: '0.9rem' }}>
+              <h4>Score Breakdown</h4>
+              {result.breakdown.hardFailReason ? (
+                <p style={{ color: 'red' }}><strong>Hard Fail:</strong> {result.breakdown.hardFailReason}</p>
+              ) : (
+                <ul>
+                  <li>Base Stars: {result.breakdown.baseStars}</li>
+                  <li>Macro Penalty: {result.breakdown.macroPenalty}</li>
+                  <li>Budget Penalty: {result.breakdown.budgetPenalty}</li>
+                  <li>Favorite Bonus: +{result.breakdown.favoriteBonus}</li>
+                  <li>Luck Roll: {result.breakdown.luckRoll > 0 ? `+${result.breakdown.luckRoll}` : result.breakdown.luckRoll}</li>
+                </ul>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

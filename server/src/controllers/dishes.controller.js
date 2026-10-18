@@ -30,7 +30,7 @@ export async function getOrder(req, res) {
  */
 export async function postDish(req, res) {
   try {
-    const { orderId, lines } = req.body;
+    const { orderId, lines, seed } = req.body;
     if (!orderId || !Array.isArray(lines)) {
       return res.status(400).json({
         error: { code: 'BAD_REQUEST', message: 'orderId and lines array are required' },
@@ -42,7 +42,15 @@ export async function postDish(req, res) {
       return res.status(404).json({ error: { code: 'ORDER_NOT_FOUND', message: 'Order not found' } });
     }
 
-    const scoringResult = score({ order, dish: { lines } });
+    const ingredients = await getAllIngredients();
+
+    const scoringResult = score({
+      order,
+      dish: { lines },
+      prices: ingredients,
+      seed: seed || orderId,
+    });
+
     const dish = await createDish(orderId, lines, scoringResult.stars);
 
     logAudit('DISH_CREATED', { dishId: dish.id, orderId, stars: dish.stars });
