@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { logAudit } from './utils/audit.js';
 import { getOrder, postDish, getDishes, getDish, patchDish, removeDish } from './controllers/dishes.controller.js';
+import { listIngredients } from './controllers/ingredients.controller.js';
 
 export function createApp() {
   const app = express();
@@ -14,6 +15,7 @@ export function createApp() {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
+  app.get('/api/ingredients', listIngredients);
   app.get('/api/orders/:id', getOrder);
   app.get('/api/dishes', getDishes);
   app.get('/api/dishes/:id', getDish);

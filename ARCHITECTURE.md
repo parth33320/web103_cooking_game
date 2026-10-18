@@ -21,6 +21,11 @@ graph TD
 - **Inputs:** `DATABASE_URL: string`
 - **Outputs:** `Promise<void>`
 
+#### `server/src/controllers/ingredients.controller.js`
+- **`listIngredients(req, res)`**
+  - **Inputs:** `req.query { category?: string, sort?: 'price'|'protein', order?: 'asc'|'desc' }`
+  - **Outputs:** `200 { ingredients: Array }` | `400/500 { error }`
+
 #### `server/src/controllers/dishes.controller.js`
 - **`getOrder(req, res)`**
   - **Inputs:** `req.params.id`
