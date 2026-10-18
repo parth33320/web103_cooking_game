@@ -668,3 +668,25 @@
 {"timestamp":"2026-10-18T08:15:06.856Z","action":"HEALTH_CHECK","details":{"ip":"127.0.0.1"}}
 {"timestamp":"2026-10-18T08:15:07.589Z","action":"HEALTH_CHECK","details":{"ip":"127.0.0.1"}}
 {"timestamp":"2026-10-18T08:16:42Z","action":"SLICE_S2.4_NEXT_DAY_SHIPPED","details":{"slice":"S2.4","endpoint":"POST /api/game/next-day","rentCharged":10.00}}
+{"timestamp":"2026-10-18T08:22:13.977Z","action":"DISH_CREATED","details":{"dishId":1,"orderId":1,"stars":5}}
+{"timestamp":"2026-10-18T08:22:14.043Z","action":"GAME_RESET","details":{"playerId":1,"kitchenId":1}}
+{"timestamp":"2026-10-18T08:22:14.109Z","action":"GAME_NEW","details":{"playerId":2,"kitchenId":2,"playerName":"Master Chef Gordon","kitchenName":"Hell Kitchen"}}
+{"timestamp":"2026-10-18T08:22:14.144Z","action":"GAME_RESET","details":{"playerId":3,"kitchenId":3}}
+{"timestamp":"2026-10-18T08:22:14.230Z","action":"GAME_NEXT_DAY","details":{"kitchenId":3,"day":2,"wallet":90,"reputation":40,"gameOver":false}}
+{"timestamp":"2026-10-18T08:22:14.254Z","action":"GAME_NEXT_DAY","details":{"kitchenId":3,"day":3,"wallet":-5,"reputation":15,"gameOver":true}}
+{"timestamp":"2026-10-18T08:22:15.308Z","action":"DISH_CREATED","details":{"dishId":1,"orderId":1,"stars":5}}
+{"timestamp":"2026-10-18T08:22:16.154Z","action":"DISH_CREATED","details":{"dishId":1,"orderId":1,"stars":5}}
+{"timestamp":"2026-10-18T08:22:16.190Z","action":"DISH_CREATED","details":{"dishId":2,"orderId":1,"stars":3.5}}
+{"timestamp":"2026-10-18T08:22:16.232Z","action":"DISH_CREATED","details":{"dishId":3,"orderId":1,"stars":5}}
+{"timestamp":"2026-10-18T08:22:16.262Z","action":"DISH_UPDATED","details":{"dishId":3,"stars":3.5}}
+{"timestamp":"2026-10-18T08:22:16.280Z","action":"DISH_CREATED","details":{"dishId":4,"orderId":1,"stars":5}}
+{"timestamp":"2026-10-18T08:22:16.287Z","action":"DISH_DELETED","details":{"dishId":4}}
+{"timestamp":"2026-10-18T08:22:18.002Z","action":"DISH_CREATED","details":{"dishId":1,"orderId":1,"stars":5}}
+{"timestamp":"2026-10-18T08:22:18.027Z","action":"DISH_CREATED","details":{"dishId":2,"orderId":1,"stars":3}}
+{"timestamp":"2026-10-18T08:22:19.206Z","action":"GAME_RESET","details":{"playerId":1,"kitchenId":1}}
+{"timestamp":"2026-10-18T08:22:22.206Z","action":"HEALTH_CHECK","details":{"ip":"127.0.0.1"}}
+{"timestamp":"2026-10-18T08:22:22.811Z","action":"HEALTH_CHECK","details":{"ip":"127.0.0.1"}}
+{"timestamp":"2026-10-18T08:23:01.003Z","action":"HEALTH_CHECK","details":{"ip":"::1"}}
+{"timestamp":"2026-10-18T08:23:01.042Z","action":"HEALTH_CHECK","details":{"ip":"::1"}}
+{"timestamp":"2026-10-18T08:23:01.252Z","action":"GAME_RESET","details":{"playerId":1,"kitchenId":1}}
+{"timestamp":"2026-10-18T08:23:01.508Z","action":"GAME_NEXT_DAY","details":{"kitchenId":1,"day":2,"wallet":90,"reputation":40,"gameOver":false}}
