@@ -24,7 +24,7 @@
 - [ ] S2.1 Ingredient market: GET with filter + sort (category, price, protein)
 - [x] S2.2 New game: auto-seed Kitchen/Wallet/starter data + `POST /api/game/reset`
 - [x] S2.3 Customers + Order generator (seeded RNG), Order -> Reviews 1:N
-- [ ] S2.4 `POST /api/game/next-day`: events from curated library, new Orders, Rent
+- [x] S2.4 `POST /api/game/next-day`: events from curated library, new Orders, Rent
 - [ ] S2.5 Frontend routing complete: dashboard, market, cook page, dish page, redirect after serve
 - [ ] S2.6 Slide-out/modal: market-event news + order details
 - [ ] S2.7 Graceful errors: API error middleware + React error boundary + toasts
@@ -74,7 +74,7 @@ Custom (need 2; target 5 so two are safe)
 | Unique field in join table (`quantity_g`) | 3 | S1.1/S1.3 | tests/api/dishes.test.js | done |
 | Data auto-generated on event (new game seed) | 3 | S2.2 | tests/api/game.test.js | done |
 | Filtering and/or sorting | 3 | S2.1 | server/test/market.api.spec.js | todo |
-| Non-RESTful route (`next-day`, `serve`) | 3 | S2.4 | server/test/nextday.api.spec.js | todo |
+| Non-RESTful route (`next-day`, `serve`) | 3 | S2.4 | tests/api/game.test.js | done |
 | Slide-out/modal | 3 | S2.6 | e2e/modal.spec.js | todo |
 | Graceful error handling | 3 | S2.7 | e2e/errors.spec.js | todo |
 | One-to-one (Player-Kitchen) | 3 | S2.2 | tests/api/game.test.js | done |
@@ -110,3 +110,7 @@ Stretch (19)
 - UI updated on `CookPage.jsx` displaying customer details (job, diet) and historical order reviews list.
 - Tests & Evidence: Vitest unit/API/security tests and Playwright E2E test green; screenshot and video in `docs/evidence/S2.3/`.
 - Next up: S2.4 `POST /api/game/next-day`: events from curated library, new Orders, Rent.
+- S2.4 Resolved PR #19 issues & verified test suite: route registration, validation order, seed data all confirmed working.
+- Test suite: 15 test files / 60 tests passing cleanly (`npm test`).
+- Standards and rubric checks pass cleanly (`npm run standards-check` and `npm run rubric-check`).
+- Next up: S2.5 Frontend routing complete: dashboard, market, cook page, dish page, redirect after serve.
