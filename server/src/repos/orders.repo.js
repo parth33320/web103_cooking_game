@@ -35,15 +35,30 @@ export async function getOrderById(orderId) {
     [orderId]
   );
 
-  const reviews = reviewsRes.rows.map((r) => ({
-    id: r.id,
-    orderId: r.order_id,
-    dishId: r.dish_id,
-    stars: parseFloat(r.stars),
-    reviewText: r.review_text,
-    breakdown: typeof r.breakdown === 'string' ? JSON.parse(r.breakdown) : r.breakdown,
-    createdAt: r.created_at,
-  }));
+  const reviews = reviewsRes.rows.map((r) => {
+    let breakdownObj = {};
+    if (r.breakdown) {
+      if (typeof r.breakdown === 'string') {
+        try {
+          breakdownObj = JSON.parse(r.breakdown);
+        } catch (e) {
+          breakdownObj = {};
+        }
+      } else {
+        breakdownObj = r.breakdown;
+      }
+    }
+
+    return {
+      id: r.id,
+      orderId: r.order_id,
+      dishId: r.dish_id,
+      stars: parseFloat(r.stars),
+      reviewText: r.review_text,
+      breakdown: breakdownObj,
+      createdAt: r.created_at,
+    };
+  });
 
   const favId = row.favorite_ingredient_id ? parseInt(row.favorite_ingredient_id, 10) : null;
   const blackId = row.blacklisted_ingredient_id ? parseInt(row.blacklisted_ingredient_id, 10) : null;

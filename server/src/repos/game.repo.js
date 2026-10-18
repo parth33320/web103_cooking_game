@@ -33,18 +33,27 @@ export async function resetDatabase() {
     await client.query('DELETE FROM kitchens');
     await client.query('DELETE FROM players');
 
-    // 1. Seed Default Player
+    // 1. Seed Default Player (id = 1)
     const playerRes = await client.query(
-      `INSERT INTO players (name)
-       VALUES ('Head Chef')
+      `INSERT INTO players (id, name)
+       VALUES (1, 'Head Chef')
+       ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name
        RETURNING id, name, created_at`
     );
     const playerRow = playerRes.rows[0];
 
-    // 2. Seed Default Kitchen (1:1 with Player)
+    // 2. Seed Default Kitchen (id = 1, 1:1 with Player)
     const kitchenRes = await client.query(
-      `INSERT INTO kitchens (player_id, name, wallet, reputation, day, tier, xp)
-       VALUES ($1, 'Bistro Starter', 100.00, 50, 1, 1, 0)
+      `INSERT INTO kitchens (id, player_id, name, wallet, reputation, day, tier, xp)
+       VALUES (1, $1, 'Bistro Starter', 100.00, 50, 1, 1, 0)
+       ON CONFLICT (id) DO UPDATE SET
+         player_id = EXCLUDED.player_id,
+         name = EXCLUDED.name,
+         wallet = EXCLUDED.wallet,
+         reputation = EXCLUDED.reputation,
+         day = EXCLUDED.day,
+         tier = EXCLUDED.tier,
+         xp = EXCLUDED.xp
        RETURNING id, player_id, name, wallet, reputation, day, tier, xp`,
       [playerRow.id]
     );
@@ -60,29 +69,60 @@ export async function resetDatabase() {
       ON CONFLICT (id) DO NOTHING
     `);
 
-    // 4. Seed Starter Customers (without explicit ID so SERIAL sequence advances)
+    // 4. Seed Starter Customers (id = 1 and 2)
     const cust1Res = await client.query(`
-      INSERT INTO customers (name, job, diet, favorite_ingredient_id)
-      VALUES ('Alice the Athlete', 'Fitness Trainer', 'High Protein', 1)
-      RETURNING id, name
-    `);
-    const cust2Res = await client.query(`
-      INSERT INTO customers (name, job, diet, favorite_ingredient_id)
-      VALUES ('Bob the Builder', 'Construction Worker', 'High Carb', 2)
+      INSERT INTO customers (id, name, job, diet, favorite_ingredient_id)
+      VALUES (1, 'Alice the Athlete', 'Fitness Trainer', 'High Protein', 1)
+      ON CONFLICT (id) DO UPDATE SET
+        name = EXCLUDED.name,
+        job = EXCLUDED.job,
+        diet = EXCLUDED.diet,
+        favorite_ingredient_id = EXCLUDED.favorite_ingredient_id
       RETURNING id, name
     `);
 
-    // 5. Seed Starter Open Orders
+    const cust2Res = await client.query(`
+      INSERT INTO customers (id, name, job, diet, favorite_ingredient_id)
+      VALUES (2, 'Bob the Builder', 'Construction Worker', 'High Carb', 2)
+      ON CONFLICT (id) DO UPDATE SET
+        name = EXCLUDED.name,
+        job = EXCLUDED.job,
+        diet = EXCLUDED.diet,
+        favorite_ingredient_id = EXCLUDED.favorite_ingredient_id
+      RETURNING id, name
+    `);
+
+    // 5. Seed Starter Open Orders (id = 1 and 2)
     const order1Res = await client.query(`
-      INSERT INTO orders (kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, tolerance_pct, favorite_ingredient_id, status)
-      VALUES ($1, $2, 15.00, 30, 20, 5, 10, 1, 'open')
+      INSERT INTO orders (id, kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, tolerance_pct, favorite_ingredient_id, status)
+      VALUES (1, $1, $2, 15.00, 30, 20, 5, 10, 1, 'open')
+      ON CONFLICT (id) DO UPDATE SET
+        kitchen_id = EXCLUDED.kitchen_id,
+        customer_id = EXCLUDED.customer_id,
+        budget = EXCLUDED.budget,
+        target_protein_g = EXCLUDED.target_protein_g,
+        target_carbs_g = EXCLUDED.target_carbs_g,
+        target_fat_g = EXCLUDED.target_fat_g,
+        tolerance_pct = EXCLUDED.tolerance_pct,
+        favorite_ingredient_id = EXCLUDED.favorite_ingredient_id,
+        status = EXCLUDED.status
       RETURNING id, kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, tolerance_pct, status`,
       [kitchenRow.id, cust1Res.rows[0].id]
     );
 
     const order2Res = await client.query(`
-      INSERT INTO orders (kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, tolerance_pct, favorite_ingredient_id, status)
-      VALUES ($1, $2, 12.00, 15, 40, 10, 10, 2, 'open')
+      INSERT INTO orders (id, kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, tolerance_pct, favorite_ingredient_id, status)
+      VALUES (2, $1, $2, 12.00, 15, 40, 10, 10, 2, 'open')
+      ON CONFLICT (id) DO UPDATE SET
+        kitchen_id = EXCLUDED.kitchen_id,
+        customer_id = EXCLUDED.customer_id,
+        budget = EXCLUDED.budget,
+        target_protein_g = EXCLUDED.target_protein_g,
+        target_carbs_g = EXCLUDED.target_carbs_g,
+        target_fat_g = EXCLUDED.target_fat_g,
+        tolerance_pct = EXCLUDED.tolerance_pct,
+        favorite_ingredient_id = EXCLUDED.favorite_ingredient_id,
+        status = EXCLUDED.status
       RETURNING id, kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, tolerance_pct, status`,
       [kitchenRow.id, cust2Res.rows[0].id]
     );
