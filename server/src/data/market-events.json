@@ -1,0 +1,170 @@
+[
+  {
+    "id": "E01",
+    "name": "Avian Flu Outbreak",
+    "description": "Poultry supplies short; protein prices spike.",
+    "category": "protein",
+    "multiplier": 2.0,
+    "duration_days": 2
+  },
+  {
+    "id": "E02",
+    "name": "Bumper Grain Harvest",
+    "description": "Grain surplus lowers carb costs.",
+    "category": "carbs",
+    "multiplier": 0.7,
+    "duration_days": 3
+  },
+  {
+    "id": "E03",
+    "name": "Drought in Green Valley",
+    "description": "Vegetable harvest impacted; prices rise.",
+    "category": "vegetable",
+    "multiplier": 1.6,
+    "duration_days": 2
+  },
+  {
+    "id": "E04",
+    "name": "Dairy Workers Strike",
+    "description": "Dairy items in high demand and low supply.",
+    "category": "dairy",
+    "multiplier": 1.8,
+    "duration_days": 2
+  },
+  {
+    "id": "E05",
+    "name": "Fisheries Bounty",
+    "description": "Fresh seafood haul drives fish prices down.",
+    "category": "protein",
+    "multiplier": 0.6,
+    "duration_days": 2
+  },
+  {
+    "id": "E06",
+    "name": "Spice Route Subsidy",
+    "description": "Government subsidies reduce seasoning costs.",
+    "category": "spice",
+    "multiplier": 0.8,
+    "duration_days": 3
+  },
+  {
+    "id": "E07",
+    "name": "Local Farmers Market Fest",
+    "description": "Fresh produce discount across all vegetables.",
+    "category": "vegetable",
+    "multiplier": 0.7,
+    "duration_days": 1
+  },
+  {
+    "id": "E08",
+    "name": "Fuel Price Surge",
+    "description": "Transport costs inflate protein import prices.",
+    "category": "protein",
+    "multiplier": 1.4,
+    "duration_days": 2
+  },
+  {
+    "id": "E09",
+    "name": "Baking Boom",
+    "description": "High demand for flour and carbs drives prices up.",
+    "category": "carbs",
+    "multiplier": 1.5,
+    "duration_days": 2
+  },
+  {
+    "id": "E10",
+    "name": "Organic Farm Fair",
+    "description": "Special promotion lowers dairy prices.",
+    "category": "dairy",
+    "multiplier": 0.8,
+    "duration_days": 2
+  },
+  {
+    "id": "E11",
+    "name": "Frost Damage",
+    "description": "Unexpected frost damages salad and vegetable crops.",
+    "category": "vegetable",
+    "multiplier": 2.2,
+    "duration_days": 3
+  },
+  {
+    "id": "E12",
+    "name": "Cattle Feed Shortage",
+    "description": "Beef and dairy production costs skyrocket.",
+    "category": "protein",
+    "multiplier": 2.5,
+    "duration_days": 3
+  },
+  {
+    "id": "E13",
+    "name": "Rice Paddy Glut",
+    "description": "Record rice yields flood the local market.",
+    "category": "carbs",
+    "multiplier": 0.6,
+    "duration_days": 3
+  },
+  {
+    "id": "E14",
+    "name": "Exotic Herb Import",
+    "description": "New trade deal brings cheap spices.",
+    "category": "spice",
+    "multiplier": 0.75,
+    "duration_days": 2
+  },
+  {
+    "id": "E15",
+    "name": "Heatwave Emergency",
+    "description": "Refrigeration costs increase dairy prices.",
+    "category": "dairy",
+    "multiplier": 1.7,
+    "duration_days": 1
+  },
+  {
+    "id": "E16",
+    "name": "Urban Farming Initiative",
+    "description": "City rooftop gardens offer cheap greens.",
+    "category": "vegetable",
+    "multiplier": 0.65,
+    "duration_days": 3
+  },
+  {
+    "id": "E17",
+    "name": "Protein Craze",
+    "description": "Fitness trend increases demand for meat.",
+    "category": "protein",
+    "multiplier": 1.75,
+    "duration_days": 2
+  },
+  {
+    "id": "E18",
+    "name": "Carb-Free Diet Fad",
+    "description": "Carb demand drops sharply.",
+    "category": "carbs",
+    "multiplier": 0.8,
+    "duration_days": 2
+  },
+  {
+    "id": "E19",
+    "name": "Port Dockworkers Delay",
+    "description": "Imported spices delayed; price surge.",
+    "category": "spice",
+    "multiplier": 2.1,
+    "duration_days": 2
+  },
+  {
+    "id": "E20",
+    "name": "Spring Pasture Season",
+    "description": "Abundant milk production lowers dairy costs.",
+    "category": "dairy",
+    "multiplier": 0.7,
+    "duration_days": 3
+  },
+  {
+    "id": "E21",
+    "name": "Superfood Craze",
+    "description": "High demand for green superfoods.",
+    "category": "vegetable",
+    "multiplier": 1.9,
+    "duration_days": 2
+  }
+]

@@ -8,6 +8,7 @@ export function App() {
   const [gameState, setGameState] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [message, setMessage] = useState('');
+  const [isNextDayPending, setIsNextDayPending] = useState(false);
 
   const fetchGameState = () => {
     fetch('/api/game/state')
@@ -34,7 +35,7 @@ export function App() {
       const res = await fetch('/api/game/reset', { method: 'POST' });
       if (res.ok) {
         const data = await res.json();
-        setGameState({ player: data.player, kitchen: data.kitchen, orders: data.orders });
+        setGameState({ player: data.player, kitchen: data.kitchen, orders: data.orders, activeEvents: data.activeEvents || [] });
         setMessage('Database reset to default seed state!');
         setShowConfirmModal(false);
       } else {
@@ -42,6 +43,34 @@ export function App() {
       }
     } catch (err) {
       setMessage('Error resetting database.');
+    }
+  };
+
+  const handleNextDay = async () => {
+    setIsNextDayPending(true);
+    setMessage('');
+    try {
+      const res = await fetch('/api/game/next-day', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        setGameState({
+          player: data.player,
+          kitchen: data.kitchen,
+          orders: data.orders,
+          activeEvents: data.activeEvents || [],
+        });
+        if (data.gameOver) {
+          setMessage(`GAME OVER! ${data.gameOverReason}`);
+        } else {
+          setMessage(`Advanced to Day ${data.kitchen.day}! Rent charged: $${data.rentCharged.toFixed(2)}.`);
+        }
+      } else {
+        setMessage('Error advancing to next day.');
+      }
+    } catch (err) {
+      setMessage('Failed to advance day.');
+    } finally {
+      setIsNextDayPending(false);
     }
   };
 
@@ -55,6 +84,8 @@ export function App() {
 
   const kitchen = gameState?.kitchen;
   const player = gameState?.player;
+  const orders = gameState?.orders || [];
+  const activeEvents = gameState?.activeEvents || [];
 
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '800px', margin: '0 auto' }}>
@@ -92,14 +123,91 @@ export function App() {
         </div>
       )}
 
+      {activeEvents.length > 0 && (
+        <div
+          id="active-events-section"
+          style={{
+            padding: '1rem',
+            backgroundColor: '#fff8e1',
+            borderRadius: '6px',
+            border: '1px solid #ffe082',
+            marginBottom: '1.5rem',
+          }}
+        >
+          <h3 style={{ marginTop: 0, color: '#f57f17' }}>📰 Active Market Events</h3>
+          <ul style={{ margin: 0, paddingLeft: '1.2rem' }}>
+            {activeEvents.map((evt) => (
+              <li key={evt.id} className="active-event-item" style={{ marginBottom: '0.5rem' }}>
+                <strong>{evt.name}</strong> ({evt.category}): {evt.multiplier}x price ({evt.daysRemaining} days remaining) - {evt.description}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {orders.length > 0 && (
+        <div
+          id="orders-section"
+          style={{
+            padding: '1rem',
+            backgroundColor: '#fafafa',
+            borderRadius: '6px',
+            border: '1px solid #e0e0e0',
+            marginBottom: '1.5rem',
+          }}
+        >
+          <h3 style={{ marginTop: 0 }}>📋 Today's Open Orders ({orders.length})</h3>
+          <div style={{ display: 'grid', gap: '0.75rem' }}>
+            {orders.map((o) => (
+              <div
+                key={o.id}
+                className="order-card"
+                style={{
+                  padding: '0.75rem 1rem',
+                  backgroundColor: '#fff',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <div>
+                  <strong>Order #{o.id}</strong> ({o.customerName || 'Customer'}) - Budget: ${o.budget?.toFixed(2)} | Target Protein: {o.targetProteinG}g
+                </div>
+                <a
+                  href={`/orders/${o.id}/cook`}
+                  className="cook-order-btn"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.history.pushState({}, '', `/orders/${o.id}/cook`);
+                    setPathname(`/orders/${o.id}/cook`);
+                  }}
+                  style={{
+                    padding: '0.4rem 0.8rem',
+                    backgroundColor: '#2e7d32',
+                    color: '#fff',
+                    textDecoration: 'none',
+                    borderRadius: '4px',
+                    fontSize: '0.9rem',
+                  }}
+                >
+                  Cook Order #{o.id}
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {message && (
         <div
           id="status-message"
           style={{
             padding: '0.75rem 1rem',
             marginBottom: '1rem',
-            backgroundColor: '#e8f5e9',
-            color: '#2e7d32',
+            backgroundColor: message.includes('GAME OVER') ? '#ffebee' : '#e8f5e9',
+            color: message.includes('GAME OVER') ? '#c62828' : '#2e7d32',
             borderRadius: '4px',
           }}
         >
@@ -108,25 +216,21 @@ export function App() {
       )}
 
       <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-        <a
-          href="/orders/1/cook"
-          id="cook-link"
-          onClick={(e) => {
-            e.preventDefault();
-            window.history.pushState({}, '', '/orders/1/cook');
-            setPathname('/orders/1/cook');
-          }}
+        <button
+          id="next-day-btn"
+          onClick={handleNextDay}
+          disabled={isNextDayPending}
           style={{
-            display: 'inline-block',
             padding: '0.75rem 1.25rem',
-            backgroundColor: '#2e7d32',
+            backgroundColor: '#7b1fa2',
             color: '#fff',
-            textDecoration: 'none',
+            border: 'none',
             borderRadius: '6px',
+            cursor: 'pointer',
           }}
         >
-          Go to Cook Order #1
-        </a>
+          {isNextDayPending ? 'Advancing...' : 'Next Day 🌙'}
+        </button>
         <a
           href="/market"
           id="market-link"

@@ -24,7 +24,7 @@
 - [x] S2.1 Ingredient market: GET with filter + sort (category, price, protein)
 - [ ] S2.2 New game: auto-seed Kitchen/Wallet/starter data + `POST /api/game/reset`
 - [ ] S2.3 Customers + Order generator (seeded RNG), Order -> Reviews 1:N
-- [ ] S2.4 `POST /api/game/next-day`: events from curated library, new Orders, Rent
+- [x] S2.4 `POST /api/game/next-day`: events from curated library, new Orders, Rent
 - [ ] S2.5 Frontend routing complete: dashboard, market, cook page, dish page, redirect after serve
 - [ ] S2.6 Slide-out/modal: market-event news + order details
 - [ ] S2.7 Graceful errors: API error middleware + React error boundary + toasts
@@ -74,7 +74,7 @@ Custom (need 2; target 5 so two are safe)
 | Unique field in join table (`quantity_g`) | 3 | S1.1/S1.3 | tests/api/dishes.test.js | done |
 | Data auto-generated on event (new game seed) | 3 | S2.2 | server/test/newgame.spec.js | todo |
 | Filtering and/or sorting | 3 | S2.1 | tests/api/ingredients.test.js | done |
-| Non-RESTful route (`next-day`, `serve`) | 3 | S2.4 | server/test/nextday.api.spec.js | todo |
+| Non-RESTful route (`next-day`, `serve`) | 3 | S2.4 | tests/api/game.test.js | done |
 | Slide-out/modal | 3 | S2.6 | e2e/modal.spec.js | todo |
 | Graceful error handling | 3 | S2.7 | e2e/errors.spec.js | todo |
 | One-to-one (Player-Kitchen) | 3 | S2.2 | server/test/schema.spec.js | todo |
@@ -110,3 +110,5 @@ Stretch (19)
 - Frontend Market Page: Created MarketPage.jsx with filter chips, sort controls, and ingredient cards; added route /market in App.jsx.
 - Tests & Evidence: Vitest API & Security tests green, Playwright E2E test green with video/screenshot evidence in docs/evidence/S2.1/.
 - Quality & Verification: All 31 backend/unit tests pass, 4 Playwright E2E tests pass, standards-check and rubric-check pass cleanly.
+- S2.4 Next Day shipped: POST /api/game/next-day handles rent deduction ($10), unserved order expiration/penalties (-5 rep each), active market event duration decay/rolls from curated JSON library, game-over checks, and seeded order generation.
+- Tests & Evidence: Vitest unit, API, security tests green (60 tests passed); Playwright E2E test green with screenshot and video evidence in docs/evidence/S2.4/.
