@@ -18,7 +18,7 @@
 ### Sprint 1 - Tracer bullet (Unit 7: Milestone 3)
 - [x] S1.1 TRACER: seeded Order -> pick ingredients -> POST dish -> stub score -> stars on screen (STUB-001, STUB-002)
 - [ ] S1.2 Scoring Engine real (budget + macros + blacklist), seeded Luck Roll, review text
-- [ ] S1.3 Dish CRUD complete + server validation (PATCH/DELETE; 400/404/409 paths)
+- [x] S1.3 Dish CRUD complete + server validation (PATCH/DELETE; 400/404/409 paths)
 
 ### Sprint 2 - Economy and world (Unit 8: Milestone 4)
 - [ ] S2.1 Ingredient market: GET with filter + sort (category, price, protein)
@@ -47,7 +47,7 @@
 | ID | Where | What it fakes | Removed by slice | Status |
 |---|---|---|---|---|
 | STUB-001 | server/src/domain/scoring.js | Returns constant 3 stars | S1.2 | open |
-| STUB-002 | server/src/repos/dishes.repo.js | Defaults `quantity_g` to 100 | S1.3 | open |
+| STUB-002 | server/src/repos/dishes.repo.js | Defaults `quantity_g` to 100 | S1.3 | closed |
 
 ## Rubric traceability matrix (CI `rubric-check` reads this)
 
@@ -57,7 +57,7 @@ Baseline (59 pts)
 |---|---|---|---|---|
 | Express backend + React frontend | 5 | S0.1/S1.1 | tests/api/health.test.js | done |
 | 1:N and M:N (join table) in Postgres | 8 | S1.1 (M:N), S2.3 (1:N) | tests/api/dishes.test.js | done |
-| RESTful API, full CRUD on one entity (Dish) | 15 | S1.1, S1.3 | tests/api/dishes.test.js | todo |
+| RESTful API, full CRUD on one entity (Dish) | 15 | S1.1, S1.3 | tests/api/dishes.test.js | done |
 | Reset DB to default | 4 | S2.2 | server/test/reset.api.spec.js | todo |
 | At least one redirection | 3 | S2.5 | e2e/redirect.spec.js | todo |
 | Same-page interaction | 3 | S1.1 | tests/e2e/tracer.spec.js | done |
@@ -70,7 +70,7 @@ Custom (need 2; target 5 so two are safe)
 
 | Rubric item | Pts | Slice | Test file | Status |
 |---|---|---|---|---|
-| POST/PATCH validated before DB write | 3 | S1.3 | server/test/validation.spec.js | todo |
+| POST/PATCH validated before DB write | 3 | S1.3 | tests/security/dishes.security.test.js | done |
 | Unique field in join table (`quantity_g`) | 3 | S1.1/S1.3 | tests/api/dishes.test.js | done |
 | Data auto-generated on event (new game seed) | 3 | S2.2 | server/test/newgame.spec.js | todo |
 | Filtering and/or sorting | 3 | S2.1 | server/test/market.api.spec.js | todo |
@@ -103,6 +103,8 @@ Stretch (19)
 
 - S0.1 Repo scaffold shipped: Express backend, Vite React SPA, health check API, audit logger, DB migration runner, CI workflows.
 - STUBs: STUB-001 (scoring) and STUB-002 (dishes repo) registered; no orphan stubs.
-- S1.1 Tracer Bullet shipped: Order details, ingredient selection, dish creation via POST /api/dishes, stub scoring, and frontend CookPage.
-- Tests & Evidence: Unit, API, Security, and Playwright E2E tests green with video evidence in docs/evidence/S1.1/video.webm.
-- Next up: S1.2 Scoring Engine real (budget + macros + blacklist), seeded Luck Roll, review text.
+- S1.3 Dish CRUD complete + server validation shipped: GET list/by ID, POST validation, PATCH update, DELETE.
+- Validation: 1-2000g integer check, non-empty lines, unique ingredients, existing ingredient check.
+- STUB-002 closed; STUB-001 removed in S1.2; all STUBs resolved.
+- Tests & Evidence: Unit, API, Security, and E2E (Playwright) green; screenshot & video in docs/evidence/S1.3/.
+- Next up: S2.1 Ingredient market: GET with filter + sort (category, price, protein).

@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { logAudit } from './utils/audit.js';
-import { getOrder, postDish } from './controllers/dishes.controller.js';
+import { getOrder, postDish, getDishes, getDish, patchDish, removeDish } from './controllers/dishes.controller.js';
 
 export function createApp() {
   const app = express();
@@ -15,7 +15,11 @@ export function createApp() {
   });
 
   app.get('/api/orders/:id', getOrder);
+  app.get('/api/dishes', getDishes);
+  app.get('/api/dishes/:id', getDish);
   app.post('/api/dishes', postDish);
+  app.patch('/api/dishes/:id', patchDish);
+  app.delete('/api/dishes/:id', removeDish);
 
   return app;
 }

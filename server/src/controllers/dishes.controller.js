@@ -1,10 +1,63 @@
 import { getOrderById, getAllIngredients } from '../repos/orders.repo.js';
-import { createDish } from '../repos/dishes.repo.js';
+import { createDish, getAllDishes, getDishById, updateDish, deleteDish } from '../repos/dishes.repo.js';
 import { score } from '../domain/scoring.js';
 import { logAudit } from '../utils/audit.js';
 
 /**
+ * Helper to validate dish ingredient lines
+ *
+ * Inputs: lines (array of { ingredientId, quantityG }), allIngredients (array of objects)
+ * Outputs: null if valid, or error object { code, message } if invalid
+ */
+function validateDishLines(lines, allIngredients) {
+  if (!Array.isArray(lines) || lines.length === 0) {
+    return { code: 'VALIDATION_ERROR', message: 'Lines must be a non-empty array' };
+  }
+
+  const validIngIds = new Set(allIngredients.map((i) => i.id));
+  const seenIngIds = new Set();
+
+  for (const line of lines) {
+    if (!line || typeof line !== 'object') {
+      return { code: 'VALIDATION_ERROR', message: 'Each line must be an object' };
+    }
+
+    const { ingredientId, quantityG } = line;
+
+    if (!ingredientId || typeof ingredientId !== 'number') {
+      return { code: 'VALIDATION_ERROR', message: 'ingredientId must be a valid number' };
+    }
+
+    if (!validIngIds.has(ingredientId)) {
+      return { code: 'INGREDIENT_NOT_FOUND', message: `Ingredient #${ingredientId} does not exist` };
+    }
+
+    if (seenIngIds.has(ingredientId)) {
+      return { code: 'VALIDATION_ERROR', message: `Duplicate ingredient #${ingredientId} in dish lines` };
+    }
+    seenIngIds.add(ingredientId);
+
+    if (
+      quantityG === undefined ||
+      typeof quantityG !== 'number' ||
+      !Number.isInteger(quantityG) ||
+      quantityG < 1 ||
+      quantityG > 2000
+    ) {
+      return {
+        code: 'VALIDATION_ERROR',
+        message: 'quantityG must be an integer between 1 and 2000 grams',
+      };
+    }
+  }
+
+  return null;
+}
+
+/**
  * Controller for Orders and Ingredients
+ * Inputs: req.params.id
+ * Outputs: JSON response { order, ingredients }
  */
 export async function getOrder(req, res) {
   try {
@@ -26,14 +79,53 @@ export async function getOrder(req, res) {
 }
 
 /**
+ * Controller to list all dishes
+ * Inputs: none
+ * Outputs: JSON response { dishes: Array }
+ */
+export async function getDishes(req, res) {
+  try {
+    const dishes = await getAllDishes();
+    return res.status(200).json({ dishes });
+  } catch (err) {
+    return res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: err.message } });
+  }
+}
+
+/**
+ * Controller to get single dish details
+ * Inputs: req.params.id
+ * Outputs: JSON response { dish }
+ */
+export async function getDish(req, res) {
+  try {
+    const dishId = parseInt(req.params.id, 10);
+    if (isNaN(dishId)) {
+      return res.status(400).json({ error: { code: 'INVALID_ID', message: 'Dish ID must be a number' } });
+    }
+
+    const dish = await getDishById(dishId);
+    if (!dish) {
+      return res.status(404).json({ error: { code: 'DISH_NOT_FOUND', message: 'Dish not found' } });
+    }
+
+    return res.status(200).json({ dish });
+  } catch (err) {
+    return res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: err.message } });
+  }
+}
+
+/**
  * Controller for Dish creation
+ * Inputs: req.body { orderId, lines, seed? }
+ * Outputs: 201 Created { dishId, stars, review, breakdown, lines }
  */
 export async function postDish(req, res) {
   try {
-    const { orderId, lines, seed } = req.body;
-    if (!orderId || !Array.isArray(lines)) {
+    const { orderId, lines, seed } = req.body || {};
+    if (!orderId || typeof orderId !== 'number') {
       return res.status(400).json({
-        error: { code: 'BAD_REQUEST', message: 'orderId and lines array are required' },
+        error: { code: 'BAD_REQUEST', message: 'orderId is required and must be a number' },
       });
     }
 
@@ -43,6 +135,11 @@ export async function postDish(req, res) {
     }
 
     const ingredients = await getAllIngredients();
+
+    const valErr = validateDishLines(lines, ingredients);
+    if (valErr) {
+      return res.status(400).json({ error: valErr });
+    }
 
     const scoringResult = score({
       order,
@@ -62,6 +159,81 @@ export async function postDish(req, res) {
       breakdown: scoringResult.breakdown,
       lines: dish.lines,
     });
+  } catch (err) {
+    return res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: err.message } });
+  }
+}
+
+/**
+ * Controller for Dish updates (PATCH)
+ * Inputs: req.params.id, req.body { lines }
+ * Outputs: 200 OK { dishId, stars, review, breakdown, lines }
+ */
+export async function patchDish(req, res) {
+  try {
+    const dishId = parseInt(req.params.id, 10);
+    if (isNaN(dishId)) {
+      return res.status(400).json({ error: { code: 'INVALID_ID', message: 'Dish ID must be a number' } });
+    }
+
+    const existingDish = await getDishById(dishId);
+    if (!existingDish) {
+      return res.status(404).json({ error: { code: 'DISH_NOT_FOUND', message: 'Dish not found' } });
+    }
+
+    const { lines } = req.body || {};
+    const ingredients = await getAllIngredients();
+
+    const valErr = validateDishLines(lines, ingredients);
+    if (valErr) {
+      return res.status(400).json({ error: valErr });
+    }
+
+    const order = await getOrderById(existingDish.orderId);
+
+    const scoringResult = score({
+      order,
+      dish: { lines },
+      prices: ingredients,
+      seed: existingDish.orderId,
+    });
+
+    const updated = await updateDish(dishId, lines, scoringResult.stars);
+
+    logAudit('DISH_UPDATED', { dishId, stars: updated.stars });
+
+    return res.status(200).json({
+      dishId: updated.id,
+      stars: updated.stars,
+      review: scoringResult.review,
+      breakdown: scoringResult.breakdown,
+      lines: updated.lines,
+    });
+  } catch (err) {
+    return res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: err.message } });
+  }
+}
+
+/**
+ * Controller for Dish deletion
+ * Inputs: req.params.id
+ * Outputs: 204 No Content
+ */
+export async function removeDish(req, res) {
+  try {
+    const dishId = parseInt(req.params.id, 10);
+    if (isNaN(dishId)) {
+      return res.status(400).json({ error: { code: 'INVALID_ID', message: 'Dish ID must be a number' } });
+    }
+
+    const deleted = await deleteDish(dishId);
+    if (!deleted) {
+      return res.status(404).json({ error: { code: 'DISH_NOT_FOUND', message: 'Dish not found' } });
+    }
+
+    logAudit('DISH_DELETED', { dishId });
+
+    return res.status(204).send();
   } catch (err) {
     return res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: err.message } });
   }
