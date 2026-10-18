@@ -19,29 +19,14 @@ export async function resetDatabase() {
   try {
     await client.query('BEGIN');
 
-    // Clean up dynamic user data
-    await client.query('DELETE FROM dish_ingredients');
-    await client.query('DELETE FROM dishes');
-
-    // Check table existence before deleting from reviews and active_events
-    const reviewsTableCheck = await client.query(`
-      SELECT 1 FROM information_schema.tables WHERE table_name = 'reviews'
-    `);
-    if (reviewsTableCheck.rows.length > 0) {
-      await client.query('DELETE FROM reviews');
+    // Clean up dynamic user data using TRUNCATE RESTART IDENTITY CASCADE
+    const tables = ['dish_ingredients', 'dishes', 'reviews', 'active_events', 'orders', 'customers', 'kitchens', 'players'];
+    for (const table of tables) {
+      const check = await client.query(`SELECT 1 FROM information_schema.tables WHERE table_name = $1`, [table]);
+      if (check.rows.length > 0) {
+        await client.query(`TRUNCATE TABLE ${table} RESTART IDENTITY CASCADE`);
+      }
     }
-
-    const activeEventsTableCheck = await client.query(`
-      SELECT 1 FROM information_schema.tables WHERE table_name = 'active_events'
-    `);
-    if (activeEventsTableCheck.rows.length > 0) {
-      await client.query('DELETE FROM active_events');
-    }
-
-    await client.query('DELETE FROM orders');
-    await client.query('DELETE FROM customers');
-    await client.query('DELETE FROM kitchens');
-    await client.query('DELETE FROM players');
 
     // 1. Seed Default Player (without explicit ID so SERIAL sequence advances)
     const playerRes = await client.query(
