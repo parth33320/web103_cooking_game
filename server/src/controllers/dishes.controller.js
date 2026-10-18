@@ -187,6 +187,14 @@ export async function postDish(req, res) {
  */
 export async function patchDish(req, res) {
   try {
+    const { lines } = req.body || {};
+    const ingredients = await getAllIngredients();
+
+    const valErr = validateDishLines(lines, ingredients);
+    if (valErr) {
+      return res.status(400).json({ error: valErr });
+    }
+
     const dishId = parseInt(req.params.id, 10);
     if (isNaN(dishId)) {
       return res.status(400).json({ error: { code: 'INVALID_ID', message: 'Dish ID must be a number' } });
@@ -195,14 +203,6 @@ export async function patchDish(req, res) {
     const existingDish = await getDishById(dishId);
     if (!existingDish) {
       return res.status(404).json({ error: { code: 'DISH_NOT_FOUND', message: 'Dish not found' } });
-    }
-
-    const { lines } = req.body || {};
-    const ingredients = await getAllIngredients();
-
-    const valErr = validateDishLines(lines, ingredients);
-    if (valErr) {
-      return res.status(400).json({ error: valErr });
     }
 
     const order = await getOrderById(existingDish.orderId);
