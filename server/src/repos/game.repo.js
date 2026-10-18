@@ -20,11 +20,12 @@ export async function resetDatabase() {
     await client.query('DELETE FROM dish_ingredients');
     await client.query('DELETE FROM dishes');
 
-    // Safe check if reviews table exists
-    try {
+    // Check table existence before deleting from reviews to avoid transaction abort in Postgres
+    const tableCheck = await client.query(`
+      SELECT 1 FROM information_schema.tables WHERE table_name = 'reviews'
+    `);
+    if (tableCheck.rows.length > 0) {
       await client.query('DELETE FROM reviews');
-    } catch (_) {
-      // Ignore if table not created yet
     }
 
     await client.query('DELETE FROM orders');
@@ -36,6 +37,7 @@ export async function resetDatabase() {
     const playerRes = await client.query(
       `INSERT INTO players (id, name)
        VALUES (1, 'Head Chef')
+       ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name
        RETURNING id, name, created_at`
     );
     const playerRow = playerRes.rows[0];
@@ -44,6 +46,14 @@ export async function resetDatabase() {
     const kitchenRes = await client.query(
       `INSERT INTO kitchens (id, player_id, name, wallet, reputation, day, tier, xp)
        VALUES (1, $1, 'Bistro Starter', 100.00, 50, 1, 1, 0)
+       ON CONFLICT (id) DO UPDATE SET
+         player_id = EXCLUDED.player_id,
+         name = EXCLUDED.name,
+         wallet = EXCLUDED.wallet,
+         reputation = EXCLUDED.reputation,
+         day = EXCLUDED.day,
+         tier = EXCLUDED.tier,
+         xp = EXCLUDED.xp
        RETURNING id, player_id, name, wallet, reputation, day, tier, xp`,
       [playerRow.id]
     );
@@ -70,12 +80,28 @@ export async function resetDatabase() {
     const order1Res = await client.query(`
       INSERT INTO orders (id, kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, status)
       VALUES (1, 1, 1, 15.00, 30, 20, 5, 'open')
+      ON CONFLICT (id) DO UPDATE SET
+        kitchen_id = EXCLUDED.kitchen_id,
+        customer_id = EXCLUDED.customer_id,
+        budget = EXCLUDED.budget,
+        target_protein_g = EXCLUDED.target_protein_g,
+        target_carbs_g = EXCLUDED.target_carbs_g,
+        target_fat_g = EXCLUDED.target_fat_g,
+        status = EXCLUDED.status
       RETURNING id, kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, status
     `);
 
     const order2Res = await client.query(`
       INSERT INTO orders (id, kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, status)
       VALUES (2, 1, 2, 12.00, 15, 40, 10, 'open')
+      ON CONFLICT (id) DO UPDATE SET
+        kitchen_id = EXCLUDED.kitchen_id,
+        customer_id = EXCLUDED.customer_id,
+        budget = EXCLUDED.budget,
+        target_protein_g = EXCLUDED.target_protein_g,
+        target_carbs_g = EXCLUDED.target_carbs_g,
+        target_fat_g = EXCLUDED.target_fat_g,
+        status = EXCLUDED.status
       RETURNING id, kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, status
     `);
 

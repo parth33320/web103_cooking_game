@@ -15,8 +15,10 @@ test('S2.1 Market Page - Filter by category and sort by price/protein', async ({
   expect(initialCount).toBeGreaterThan(0);
 
   // Filter by category 'protein'
+  const proteinResponsePromise = page.waitForResponse((res) => res.url().includes('/api/ingredients') && res.status() === 200);
   await page.locator('[data-testid="filter-protein"]').click();
-  await page.waitForResponse((res) => res.url().includes('/api/ingredients') && res.status() === 200);
+  await proteinResponsePromise;
+
   const proteinCards = page.locator('[data-testid^="ingredient-card-"]');
   expect(await proteinCards.count()).toBeGreaterThan(0);
   for (let i = 0; i < await proteinCards.count(); i++) {
@@ -24,11 +26,15 @@ test('S2.1 Market Page - Filter by category and sort by price/protein', async ({
   }
 
   // Filter back to 'all'
+  const allResponsePromise = page.waitForResponse((res) => res.url().includes('/api/ingredients') && res.status() === 200);
   await page.locator('[data-testid="filter-all"]').click();
+  await allResponsePromise;
 
   // Sort by price descending
+  const sortResponsePromise = page.waitForResponse((res) => res.url().includes('/api/ingredients') && res.status() === 200);
   await page.locator('[data-testid="sort-select"]').selectOption('price');
   await page.locator('[data-testid="order-select"]').selectOption('desc');
+  await sortResponsePromise;
 
   // Take screenshot evidence
   await page.screenshot({ path: 'docs/evidence/S2.1/market.png', fullPage: true });
