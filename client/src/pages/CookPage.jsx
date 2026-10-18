@@ -8,11 +8,7 @@ export function CookPage() {
   const [status, setStatus] = useState('loading');
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    // Extract orderId from URL pathname, e.g. /orders/1/cook
-    const pathParts = window.location.pathname.split('/');
-    const orderId = pathParts[2] || '1';
-
+  const fetchOrderDetails = (orderId) => {
     fetch(`/api/orders/${orderId}`)
       .then((res) => {
         if (!res.ok) throw new Error('Order not found');
@@ -27,6 +23,14 @@ export function CookPage() {
         setError(err.message);
         setStatus('error');
       });
+  };
+
+  useEffect(() => {
+    // Extract orderId from URL pathname, e.g. /orders/1/cook
+    const pathParts = window.location.pathname.split('/');
+    const orderId = pathParts[2] || '1';
+
+    fetchOrderDetails(orderId);
   }, []);
 
   const toggleIngredient = (id) => {
@@ -53,6 +57,8 @@ export function CookPage() {
       if (!res.ok) throw new Error(data.error?.message || 'Failed to serve dish');
       setResult(data);
       setStatus('done');
+      // Refresh order details to update reviews list (1:N orders -> reviews)
+      fetchOrderDetails(order.id);
     } catch (err) {
       setError(err.message);
       setStatus('idle');
@@ -66,10 +72,17 @@ export function CookPage() {
     <div style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '600px', margin: '0 auto' }}>
       <h1>Cook Page</h1>
       {order && (
-        <div style={{ border: '1px solid #ccc', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
-          <h2>Order #{order.id} for {order.customerName}</h2>
-          <p><strong>Budget:</strong> ${order.budget.toFixed(2)}</p>
-          <p><strong>Protein Target:</strong> {order.targetProteinG}g</p>
+        <div style={{ border: '1px solid #ccc', padding: '1.25rem', borderRadius: '8px', marginBottom: '1.5rem', backgroundColor: '#fafafa' }}>
+          <h2 style={{ marginTop: 0 }}>Order #{order.id} for {order.customerName}</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '1rem' }}>
+            <p><strong>Job:</strong> <span id="customer-job">{order.job}</span></p>
+            <p><strong>Diet:</strong> <span id="customer-diet">{order.diet}</span></p>
+            <p><strong>Favorite Ingredient:</strong> <span id="customer-favorite">{order.favoriteIngredientName || 'None'}</span></p>
+            <p><strong>Blacklisted Ingredient:</strong> <span id="customer-blacklist">{order.blacklistedIngredientName || 'None'}</span></p>
+          </div>
+          <hr style={{ border: '0', borderTop: '1px solid #e0e0e0', margin: '0.75rem 0' }} />
+          <p><strong>Budget:</strong> ${order.budget?.toFixed(2)}</p>
+          <p><strong>Macro Targets:</strong> Protein {order.targetProteinG}g | Carbs {order.targetCarbsG || 0}g | Fat {order.targetFatG || 0}g (±{order.tolerancePct || 10}%)</p>
         </div>
       )}
 
@@ -140,6 +153,19 @@ export function CookPage() {
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {order && order.reviews && order.reviews.length > 0 && (
+        <div id="order-reviews-section" style={{ marginTop: '2rem', padding: '1rem', border: '1px solid #e0e0e0', borderRadius: '8px', backgroundColor: '#fff' }}>
+          <h3 style={{ marginTop: 0 }}>Customer Reviews for Order #{order.id} ({order.reviews.length})</h3>
+          <ul style={{ paddingLeft: '1.25rem', margin: 0 }}>
+            {order.reviews.map((rev) => (
+              <li key={rev.id} style={{ marginBottom: '0.75rem' }} data-testid={`order-review-${rev.id}`}>
+                <strong>{'⭐'.repeat(Math.round(rev.stars))} ({rev.stars} stars):</strong> "{rev.reviewText}"
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>

@@ -7,10 +7,12 @@ import { pool } from '../db/index.js';
  *   - orderId: number
  *   - lines: array of { ingredientId: number, quantityG?: number }
  *   - stars: number
+ *   - reviewText?: string
+ *   - breakdown?: object
  * Outputs:
  *   - dish: { id, orderId, stars, lines: Array<{ ingredientId, quantityG }> }
  */
-export async function createDish(orderId, lines, stars) {
+export async function createDish(orderId, lines, stars, reviewText = null, breakdown = null) {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -38,6 +40,15 @@ export async function createDish(orderId, lines, stars) {
         ingredientId: line.ingredientId,
         quantityG: line.quantityG,
       });
+    }
+
+    // Insert review record into reviews table
+    if (reviewText) {
+      await client.query(
+        `INSERT INTO reviews (order_id, dish_id, stars, review_text, breakdown)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [orderId, dish.id, stars, reviewText, JSON.stringify(breakdown || {})]
+      );
     }
 
     await client.query('COMMIT');
@@ -139,10 +150,10 @@ export async function getDishById(dishId) {
 
 /**
  * Update dish lines and stars
- * Inputs: dishId (number), lines (array of { ingredientId, quantityG }), stars (number)
+ * Inputs: dishId (number), lines (array of { ingredientId, quantityG }), stars (number), reviewText?: string, breakdown?: object
  * Outputs: updated dish object
  */
-export async function updateDish(dishId, lines, stars) {
+export async function updateDish(dishId, lines, stars, reviewText = null, breakdown = null) {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -173,6 +184,14 @@ export async function updateDish(dishId, lines, stars) {
         ingredientId: line.ingredientId,
         quantityG: line.quantityG,
       });
+    }
+
+    if (reviewText) {
+      await client.query(
+        `INSERT INTO reviews (order_id, dish_id, stars, review_text, breakdown)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [updateRes.rows[0].order_id, dishId, stars, reviewText, JSON.stringify(breakdown || {})]
+      );
     }
 
     await client.query('COMMIT');

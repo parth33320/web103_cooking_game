@@ -23,7 +23,7 @@
 ### Sprint 2 - Economy and world (Unit 8: Milestone 4)
 - [ ] S2.1 Ingredient market: GET with filter + sort (category, price, protein)
 - [x] S2.2 New game: auto-seed Kitchen/Wallet/starter data + `POST /api/game/reset`
-- [ ] S2.3 Customers + Order generator (seeded RNG), Order -> Reviews 1:N
+- [x] S2.3 Customers + Order generator (seeded RNG), Order -> Reviews 1:N
 - [ ] S2.4 `POST /api/game/next-day`: events from curated library, new Orders, Rent
 - [ ] S2.5 Frontend routing complete: dashboard, market, cook page, dish page, redirect after serve
 - [ ] S2.6 Slide-out/modal: market-event news + order details
@@ -56,7 +56,7 @@ Baseline (59 pts)
 | Rubric item | Pts | Slice | Test file | Status |
 |---|---|---|---|---|
 | Express backend + React frontend | 5 | S0.1/S1.1 | tests/api/health.test.js | done |
-| 1:N and M:N (join table) in Postgres | 8 | S1.1 (M:N), S2.3 (1:N) | tests/api/dishes.test.js | done |
+| 1:N and M:N (join table) in Postgres | 8 | S1.1 (M:N), S2.3 (1:N) | tests/api/orders.test.js | done |
 | RESTful API, full CRUD on one entity (Dish) | 15 | S1.1, S1.3 | tests/api/dishes.test.js | done |
 | Reset DB to default | 4 | S2.2 | tests/api/game.test.js | done |
 | At least one redirection | 3 | S2.5 | e2e/redirect.spec.js | todo |
@@ -105,7 +105,8 @@ Stretch (19)
 - STUBs: STUB-001 (scoring) and STUB-002 (dishes repo) registered; no orphan stubs.
 - S1.3 Dish CRUD complete + server validation shipped: GET list/by ID, POST validation, PATCH update, DELETE.
 - S2.2 New game & reset shipped: DB migration 002 adds `players` table with 1:1 `player_id UNIQUE` constraint on `kitchens`.
-- API endpoints: `POST /api/game/reset`, `POST /api/game/new`, `GET /api/game/state` with audit logging.
-- UI: Kitchen statistics dashboard + "Reset Game" button with modal confirmation dialog.
-- Tests & Evidence: API, Security, and E2E Playwright tests green; screenshot and video in `docs/evidence/S2.2/`.
-- Next up: S2.3 Customers + Order generator (seeded RNG), Order -> Reviews 1:N.
+- S2.3 Customers & Order Generator with 1:N Reviews shipped: DB migration 003 adds customer attributes, order preferences, and `reviews` table.
+- Seeded PRNG generator (`generator.js`) and review generator (`review.js`) with 3+ template variants per condition.
+- UI updated on `CookPage.jsx` displaying customer details (job, diet) and historical order reviews list.
+- Tests & Evidence: Vitest unit/API/security tests and Playwright E2E test green; screenshot and video in `docs/evidence/S2.3/`.
+- Next up: S2.4 `POST /api/game/next-day`: events from curated library, new Orders, Rent.

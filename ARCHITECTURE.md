@@ -17,6 +17,14 @@ graph TD
 - **Inputs:** `{ order: Order, dish: Dish, prices: MarketPrices, seed: number }`
 - **Outputs:** `{ stars: number, breakdown: Breakdown, review: string }`
 
+#### `server/src/domain/generator.js`
+- **Inputs:** `{ kitchenTier?: number, seed?: number|string, ingredients?: Array }`
+- **Outputs:** `{ customer: CustomerProfile, order: OrderSpec }`
+
+#### `server/src/domain/review.js`
+- **Inputs:** `{ breakdown: Breakdown, stars: number, favoriteName?: string, seed?: number|string }`
+- **Outputs:** `reviewText: string`
+
 #### `server/src/db/migrate.js`
 - **Inputs:** `DATABASE_URL: string`
 - **Outputs:** `Promise<void>`
@@ -47,8 +55,8 @@ graph TD
   - **Outputs:** `204 No Content` | `400/404/500 { error }`
 
 #### `server/src/repos/dishes.repo.js`
-- **`createDish(orderId, lines, stars)`**
-  - **Inputs:** `orderId: number`, `lines: Array<{ ingredientId: number, quantityG: number }>`, `stars: number`
+- **`createDish(orderId, lines, stars, reviewText, breakdown)`**
+  - **Inputs:** `orderId: number`, `lines: Array<{ ingredientId: number, quantityG: number }>`, `stars: number`, `reviewText?: string`, `breakdown?: object`
   - **Outputs:** `Promise<{ id, orderId, kitchenId, stars, lines, createdAt }>`
 - **`getAllDishes()`**
   - **Inputs:** None
@@ -56,12 +64,20 @@ graph TD
 - **`getDishById(dishId)`**
   - **Inputs:** `dishId: number`
   - **Outputs:** `Promise<{ id, orderId, kitchenId, stars, lines, createdAt } | null>`
-- **`updateDish(dishId, lines, stars)`**
-  - **Inputs:** `dishId: number`, `lines: Array<{ ingredientId: number, quantityG: number }>`, `stars: number`
+- **`updateDish(dishId, lines, stars, reviewText, breakdown)`**
+  - **Inputs:** `dishId: number`, `lines: Array<{ ingredientId: number, quantityG: number }>`, `stars: number`, `reviewText?: string`, `breakdown?: object`
   - **Outputs:** `Promise<{ id, orderId, kitchenId, stars, lines, createdAt } | null>`
 - **`deleteDish(dishId)`**
   - **Inputs:** `dishId: number`
   - **Outputs:** `Promise<boolean>`
+
+#### `server/src/repos/orders.repo.js`
+- **`getOrderById(orderId)`**
+  - **Inputs:** `orderId: number`
+  - **Outputs:** `Promise<{ id, kitchenId, customerId, customerName, job, diet, budget, targetProteinG, targetCarbsG, targetFatG, tolerancePct, favoriteIngredientId, blacklistedIngredientId, reviews: Array }> | null`
+- **`createCustomerAndOrder({ kitchenId, customer, order })`**
+  - **Inputs:** `{ kitchenId: number, customer: object, order: object }`
+  - **Outputs:** `Promise<OrderObject>`
 
 #### `server/src/utils/audit.js`
 - **Inputs:** `{ action: string, details: object }`
