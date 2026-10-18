@@ -43,7 +43,7 @@ export async function resetDatabase() {
     await client.query('DELETE FROM kitchens');
     await client.query('DELETE FROM players');
 
-    // 1. Seed Default Player
+    // 1. Seed Default Player (without explicit ID so SERIAL sequence advances)
     const playerRes = await client.query(
       `INSERT INTO players (name)
        VALUES ('Head Chef')
@@ -51,7 +51,7 @@ export async function resetDatabase() {
     );
     const playerRow = playerRes.rows[0];
 
-    // 2. Seed Default Kitchen (1:1 with Player)
+    // 2. Seed Default Kitchen (without explicit ID so SERIAL sequence advances)
     const kitchenRes = await client.query(
       `INSERT INTO kitchens (player_id, name, wallet, reputation, day, tier, xp)
        VALUES ($1, 'Bistro Starter', 100.00, 50, 1, 1, 0)
@@ -82,7 +82,7 @@ export async function resetDatabase() {
       RETURNING id, name
     `);
 
-    // 5. Seed Starter Open Orders
+    // 5. Seed Starter Open Orders (without explicit ID so SERIAL sequence advances)
     const order1Res = await client.query(`
       INSERT INTO orders (kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, tolerance_pct, favorite_ingredient_id, status)
       VALUES ($1, $2, 15.00, 30, 20, 5, 10, 1, 'open')
