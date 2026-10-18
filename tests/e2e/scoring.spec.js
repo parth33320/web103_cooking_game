@@ -4,7 +4,7 @@ test('S1.2 Scoring Engine - Serve a dish and view stars with breakdown', async (
   await page.goto('/orders/1/cook');
 
   await expect(page.locator('h1')).toHaveText('Cook Page');
-  await expect(page.locator('text=Order #1')).toBeVisible();
+  await expect(page.locator('text=Order #1').first()).toBeVisible();
 
   // Select ingredients
   const chickenBtn = page.getByTestId('ingredient-1');

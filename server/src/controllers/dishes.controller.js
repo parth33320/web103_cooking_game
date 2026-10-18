@@ -1,6 +1,7 @@
 import { getOrderById, getAllIngredients } from '../repos/orders.repo.js';
 import { createDish, getAllDishes, getDishById, updateDish, deleteDish } from '../repos/dishes.repo.js';
 import { score } from '../domain/scoring.js';
+import { generateReviewText } from '../domain/review.js';
 import { logAudit } from '../utils/audit.js';
 
 /**
@@ -141,21 +142,36 @@ export async function postDish(req, res) {
       return res.status(400).json({ error: valErr });
     }
 
+    const scoringSeed = seed !== undefined ? seed : orderId;
+
     const scoringResult = score({
       order,
       dish: { lines },
       prices: ingredients,
-      seed: seed || orderId,
+      seed: scoringSeed,
     });
 
-    const dish = await createDish(orderId, lines, scoringResult.stars);
+    const reviewText = generateReviewText({
+      breakdown: scoringResult.breakdown,
+      stars: scoringResult.stars,
+      favoriteName: order.favoriteIngredientName,
+      seed: scoringSeed,
+    });
+
+    const dish = await createDish(
+      orderId,
+      lines,
+      scoringResult.stars,
+      reviewText,
+      scoringResult.breakdown
+    );
 
     logAudit('DISH_CREATED', { dishId: dish.id, orderId, stars: dish.stars });
 
     return res.status(201).json({
       dishId: dish.id,
       stars: dish.stars,
-      review: scoringResult.review,
+      review: reviewText,
       breakdown: scoringResult.breakdown,
       lines: dish.lines,
     });
@@ -198,14 +214,27 @@ export async function patchDish(req, res) {
       seed: existingDish.orderId,
     });
 
-    const updated = await updateDish(dishId, lines, scoringResult.stars);
+    const reviewText = generateReviewText({
+      breakdown: scoringResult.breakdown,
+      stars: scoringResult.stars,
+      favoriteName: order?.favoriteIngredientName,
+      seed: existingDish.orderId,
+    });
+
+    const updated = await updateDish(
+      dishId,
+      lines,
+      scoringResult.stars,
+      reviewText,
+      scoringResult.breakdown
+    );
 
     logAudit('DISH_UPDATED', { dishId, stars: updated.stars });
 
     return res.status(200).json({
       dishId: updated.id,
       stars: updated.stars,
-      review: scoringResult.review,
+      review: reviewText,
       breakdown: scoringResult.breakdown,
       lines: updated.lines,
     });
