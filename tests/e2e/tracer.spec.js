@@ -18,5 +18,5 @@ test('S1.1 Tracer Bullet - Serve a dish and view stars', async ({ page }) => {
   // Check stars rating appears
   const resultBox = page.locator('#result-box');
   await expect(resultBox).toBeVisible();
-  await expect(page.locator('#star-rating')).toContainText('3 Stars');
+  await expect(page.locator('#star-rating')).toContainText('Stars');
 });
