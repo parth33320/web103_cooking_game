@@ -22,7 +22,7 @@
 
 ### Sprint 2 - Economy and world (Unit 8: Milestone 4)
 - [ ] S2.1 Ingredient market: GET with filter + sort (category, price, protein)
-- [ ] S2.2 New game: auto-seed Kitchen/Wallet/starter data + `POST /api/game/reset`
+- [x] S2.2 New game: auto-seed Kitchen/Wallet/starter data + `POST /api/game/reset`
 - [ ] S2.3 Customers + Order generator (seeded RNG), Order -> Reviews 1:N
 - [ ] S2.4 `POST /api/game/next-day`: events from curated library, new Orders, Rent
 - [ ] S2.5 Frontend routing complete: dashboard, market, cook page, dish page, redirect after serve
@@ -58,7 +58,7 @@ Baseline (59 pts)
 | Express backend + React frontend | 5 | S0.1/S1.1 | tests/api/health.test.js | done |
 | 1:N and M:N (join table) in Postgres | 8 | S1.1 (M:N), S2.3 (1:N) | tests/api/dishes.test.js | done |
 | RESTful API, full CRUD on one entity (Dish) | 15 | S1.1, S1.3 | tests/api/dishes.test.js | done |
-| Reset DB to default | 4 | S2.2 | server/test/reset.api.spec.js | todo |
+| Reset DB to default | 4 | S2.2 | tests/api/game.test.js | done |
 | At least one redirection | 3 | S2.5 | e2e/redirect.spec.js | todo |
 | Same-page interaction | 3 | S1.1 | tests/e2e/tracer.spec.js | done |
 | Dynamic frontend routes (React Router) | 4 | S2.5 | e2e/routes.spec.js | todo |
@@ -72,12 +72,12 @@ Custom (need 2; target 5 so two are safe)
 |---|---|---|---|---|
 | POST/PATCH validated before DB write | 3 | S1.3 | tests/security/dishes.security.test.js | done |
 | Unique field in join table (`quantity_g`) | 3 | S1.1/S1.3 | tests/api/dishes.test.js | done |
-| Data auto-generated on event (new game seed) | 3 | S2.2 | server/test/newgame.spec.js | todo |
+| Data auto-generated on event (new game seed) | 3 | S2.2 | tests/api/game.test.js | done |
 | Filtering and/or sorting | 3 | S2.1 | server/test/market.api.spec.js | todo |
 | Non-RESTful route (`next-day`, `serve`) | 3 | S2.4 | server/test/nextday.api.spec.js | todo |
 | Slide-out/modal | 3 | S2.6 | e2e/modal.spec.js | todo |
 | Graceful error handling | 3 | S2.7 | e2e/errors.spec.js | todo |
-| One-to-one (Player-Kitchen) | 3 | S2.2 | server/test/schema.spec.js | todo |
+| One-to-one (Player-Kitchen) | 3 | S2.2 | tests/api/game.test.js | done |
 
 Stretch (19)
 
@@ -104,7 +104,8 @@ Stretch (19)
 - S0.1 Repo scaffold shipped: Express backend, Vite React SPA, health check API, audit logger, DB migration runner, CI workflows.
 - STUBs: STUB-001 (scoring) and STUB-002 (dishes repo) registered; no orphan stubs.
 - S1.3 Dish CRUD complete + server validation shipped: GET list/by ID, POST validation, PATCH update, DELETE.
-- Validation: 1-2000g integer check, non-empty lines, unique ingredients, existing ingredient check.
-- STUB-002 closed; STUB-001 removed in S1.2; all STUBs resolved.
-- Tests & Evidence: Unit, API, Security, and E2E (Playwright) green; screenshot & video in docs/evidence/S1.3/.
-- Next up: S2.1 Ingredient market: GET with filter + sort (category, price, protein).
+- S2.2 New game & reset shipped: DB migration 002 adds `players` table with 1:1 `player_id UNIQUE` constraint on `kitchens`.
+- API endpoints: `POST /api/game/reset`, `POST /api/game/new`, `GET /api/game/state` with audit logging.
+- UI: Kitchen statistics dashboard + "Reset Game" button with modal confirmation dialog.
+- Tests & Evidence: API, Security, and E2E Playwright tests green; screenshot and video in `docs/evidence/S2.2/`.
+- Next up: S2.3 Customers + Order generator (seeded RNG), Order -> Reviews 1:N.
