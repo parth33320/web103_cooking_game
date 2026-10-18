@@ -16,7 +16,7 @@
 - [ ] S0.2 Docs deliverables: README features (6+), user stories (10+, 1-3 roles), wireframes (3+ as embedded images), ERD (Mermaid + table list)
 
 ### Sprint 1 - Tracer bullet (Unit 7: Milestone 3)
-- [ ] S1.1 TRACER: seeded Order -> pick ingredients -> POST dish -> stub score -> stars on screen (STUB-001, STUB-002)
+- [x] S1.1 TRACER: seeded Order -> pick ingredients -> POST dish -> stub score -> stars on screen (STUB-001, STUB-002)
 - [ ] S1.2 Scoring Engine real (budget + macros + blacklist), seeded Luck Roll, review text
 - [ ] S1.3 Dish CRUD complete + server validation (PATCH/DELETE; 400/404/409 paths)
 
@@ -47,7 +47,7 @@
 | ID | Where | What it fakes | Removed by slice | Status |
 |---|---|---|---|---|
 | STUB-001 | server/src/domain/scoring.js | Returns constant 3 stars | S1.2 | open |
-| STUB-002 | server/src/repos/dishes.js | Defaults `quantity_g` to 100 | S1.3 | open |
+| STUB-002 | server/src/repos/dishes.repo.js | Defaults `quantity_g` to 100 | S1.3 | open |
 
 ## Rubric traceability matrix (CI `rubric-check` reads this)
 
@@ -56,14 +56,14 @@ Baseline (59 pts)
 | Rubric item | Pts | Slice | Test file | Status |
 |---|---|---|---|---|
 | Express backend + React frontend | 5 | S0.1/S1.1 | tests/api/health.test.js | done |
-| 1:N and M:N (join table) in Postgres | 8 | S1.1 (M:N), S2.3 (1:N) | server/test/schema.spec.js | todo |
-| RESTful API, full CRUD on one entity (Dish) | 15 | S1.1, S1.3 | server/test/dishes.api.spec.js | todo |
+| 1:N and M:N (join table) in Postgres | 8 | S1.1 (M:N), S2.3 (1:N) | tests/api/dishes.test.js | done |
+| RESTful API, full CRUD on one entity (Dish) | 15 | S1.1, S1.3 | tests/api/dishes.test.js | todo |
 | Reset DB to default | 4 | S2.2 | server/test/reset.api.spec.js | todo |
 | At least one redirection | 3 | S2.5 | e2e/redirect.spec.js | todo |
-| Same-page interaction | 3 | S1.1 | e2e/tracer.spec.js | todo |
+| Same-page interaction | 3 | S1.1 | tests/e2e/tracer.spec.js | done |
 | Dynamic frontend routes (React Router) | 4 | S2.5 | e2e/routes.spec.js | todo |
 | Hierarchical components (page/presenter) | 6 | S1.1+ | docs/ARCHITECTURE.md | todo |
-| Dynamic routes in frontend AND backend | 3 | S1.1, S2.5 | e2e/routes.spec.js | todo |
+| Dynamic routes in frontend AND backend | 3 | S1.1, S2.5 | tests/e2e/tracer.spec.js | done |
 | Deployed on Render, everything working | 8 | S3.3 | e2e/live.spec.js | todo |
 
 Custom (need 2; target 5 so two are safe)
@@ -71,7 +71,7 @@ Custom (need 2; target 5 so two are safe)
 | Rubric item | Pts | Slice | Test file | Status |
 |---|---|---|---|---|
 | POST/PATCH validated before DB write | 3 | S1.3 | server/test/validation.spec.js | todo |
-| Unique field in join table (`quantity_g`) | 3 | S1.1/S1.3 | server/test/schema.spec.js | todo |
+| Unique field in join table (`quantity_g`) | 3 | S1.1/S1.3 | tests/api/dishes.test.js | done |
 | Data auto-generated on event (new game seed) | 3 | S2.2 | server/test/newgame.spec.js | todo |
 | Filtering and/or sorting | 3 | S2.1 | server/test/market.api.spec.js | todo |
 | Non-RESTful route (`next-day`, `serve`) | 3 | S2.4 | server/test/nextday.api.spec.js | todo |
@@ -103,6 +103,6 @@ Stretch (19)
 
 - S0.1 Repo scaffold shipped: Express backend, Vite React SPA, health check API, audit logger, DB migration runner, CI workflows.
 - STUBs: STUB-001 (scoring) and STUB-002 (dishes repo) registered; no orphan stubs.
-- Next up: S0.2 Docs deliverables (README features, user stories, wireframes, ERD).
-- Gotchas: Ensure Postgres instance is running locally or via Docker on port 5432 for test suites.
-- Open questions: None; all CI checks, Vitest tests, and Playwright video E2E tests are passing cleanly.
+- S1.1 Tracer Bullet shipped: Order details, ingredient selection, dish creation via POST /api/dishes, stub scoring, and frontend CookPage.
+- Tests & Evidence: Unit, API, Security, and Playwright E2E tests green with video evidence in docs/evidence/S1.1/video.webm.
+- Next up: S1.2 Scoring Engine real (budget + macros + blacklist), seeded Luck Roll, review text.

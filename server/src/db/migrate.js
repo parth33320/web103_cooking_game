@@ -1,17 +1,9 @@
 import pg from 'pg';
 import fs from 'node:fs';
 import path from 'node:path';
+import { pool } from './index.js';
 
-const { Pool } = pg;
-
-export async function runMigrations(dbUrl) {
-  const connectionString = dbUrl || process.env.DATABASE_URL;
-  if (!connectionString) {
-    console.warn('No DATABASE_URL set. Skipping migrations.');
-    return;
-  }
-
-  const pool = new Pool({ connectionString });
+export async function runMigrations() {
   try {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -24,7 +16,7 @@ export async function runMigrations(dbUrl) {
     const migrationsDir = path.resolve(process.cwd(), 'server/src/db/migrations');
     if (!fs.existsSync(migrationsDir)) return;
 
-    const files = fs.readdirSync(migrationsDir).filter(f => f.endsWith('.sql')).sort();
+    const files = fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort();
     for (const file of files) {
       const res = await pool.query('SELECT 1 FROM schema_migrations WHERE filename = $1', [file]);
       if (res.rowCount === 0) {
@@ -33,7 +25,8 @@ export async function runMigrations(dbUrl) {
         await pool.query('INSERT INTO schema_migrations (filename) VALUES ($1)', [file]);
       }
     }
-  } finally {
-    await pool.end();
+  } catch (err) {
+    console.error('Migration error:', err);
+    throw err;
   }
 }
