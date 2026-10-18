@@ -3,6 +3,7 @@ import cors from 'cors';
 import { logAudit } from './utils/audit.js';
 import { getOrder, postDish, getDishes, getDish, patchDish, removeDish } from './controllers/dishes.controller.js';
 import { listIngredients } from './controllers/ingredients.controller.js';
+import { handleResetGame, handleNewGame, handleGetGameState } from './controllers/game.controller.js';
 
 export function createApp() {
   const app = express();
@@ -22,6 +23,11 @@ export function createApp() {
   app.post('/api/dishes', postDish);
   app.patch('/api/dishes/:id', patchDish);
   app.delete('/api/dishes/:id', removeDish);
+
+  // Game control routes
+  app.post('/api/game/reset', handleResetGame);
+  app.post('/api/game/new', handleNewGame);
+  app.get('/api/game/state', handleGetGameState);
 
   return app;
 }
