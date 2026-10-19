@@ -3,19 +3,20 @@ import { createDish, getAllDishes, getDishById, updateDish, deleteDish } from '.
 import { score } from '../domain/scoring.js';
 import { generateReviewText } from '../domain/review.js';
 import { logAudit } from '../utils/audit.js';
+import { pool } from '../db/index.js';
 
 /**
- * Helper to validate dish ingredient lines
+ * Helper to validate dish ingredient lines including kitchen Tier gating
  *
- * Inputs: lines (array of { ingredientId, quantityG }), allIngredients (array of objects)
+ * Inputs: lines (array of { ingredientId, quantityG }), allIngredients (array of objects), kitchenTier (number)
  * Outputs: null if valid, or error object { code, message } if invalid
  */
-function validateDishLines(lines, allIngredients) {
+function validateDishLines(lines, allIngredients, kitchenTier = 1) {
   if (!Array.isArray(lines) || lines.length === 0) {
     return { code: 'VALIDATION_ERROR', message: 'Lines must be a non-empty array' };
   }
 
-  const validIngIds = new Set(allIngredients.map((i) => i.id));
+  const validIngMap = new Map(allIngredients.map((i) => [i.id, i]));
   const seenIngIds = new Set();
 
   for (const line of lines) {
@@ -29,8 +30,17 @@ function validateDishLines(lines, allIngredients) {
       return { code: 'VALIDATION_ERROR', message: 'ingredientId must be a valid number' };
     }
 
-    if (!validIngIds.has(ingredientId)) {
+    const ing = validIngMap.get(ingredientId);
+    if (!ing) {
       return { code: 'INGREDIENT_NOT_FOUND', message: `Ingredient #${ingredientId} does not exist` };
+    }
+
+    // Tier-gating check
+    if (ing.minTier && ing.minTier > kitchenTier) {
+      return {
+        code: 'TIER_LOCKED',
+        message: `Ingredient #${ingredientId} (${ing.name}) requires Tier ${ing.minTier}. Your kitchen is currently Tier ${kitchenTier}.`,
+      };
     }
 
     if (seenIngIds.has(ingredientId)) {
@@ -119,7 +129,7 @@ export async function getDish(req, res) {
 /**
  * Controller for Dish creation
  * Inputs: req.body { orderId, lines, seed? }
- * Outputs: 201 Created { dishId, stars, review, breakdown, lines }
+ * Outputs: 201 Created { dishId, stars, review, breakdown, lines, xpGained, kitchen }
  */
 export async function postDish(req, res) {
   try {
@@ -135,9 +145,13 @@ export async function postDish(req, res) {
       return res.status(404).json({ error: { code: 'ORDER_NOT_FOUND', message: 'Order not found' } });
     }
 
+    // Fetch kitchen state for tier gating
+    const kitchenRes = await pool.query('SELECT tier FROM kitchens WHERE id = $1', [order.kitchenId]);
+    const kitchenTier = kitchenRes.rows[0]?.tier || 1;
+
     const ingredients = await getAllIngredients();
 
-    const valErr = validateDishLines(lines, ingredients);
+    const valErr = validateDishLines(lines, ingredients, kitchenTier);
     if (valErr) {
       return res.status(400).json({ error: valErr });
     }
@@ -158,7 +172,7 @@ export async function postDish(req, res) {
       seed: scoringSeed,
     });
 
-    const dish = await createDish(
+    const dishResult = await createDish(
       orderId,
       lines,
       scoringResult.stars,
@@ -166,14 +180,21 @@ export async function postDish(req, res) {
       scoringResult.breakdown
     );
 
-    logAudit('DISH_CREATED', { dishId: dish.id, orderId, stars: dish.stars });
+    logAudit('DISH_CREATED', { dishId: dishResult.id, orderId, stars: dishResult.stars });
 
     return res.status(201).json({
-      dishId: dish.id,
-      stars: dish.stars,
+      dishId: dishResult.id,
+      stars: dishResult.stars,
       review: reviewText,
       breakdown: scoringResult.breakdown,
-      lines: dish.lines,
+      lines: dishResult.lines,
+      xpGained: dishResult.progression.xpGained,
+      leveledUp: dishResult.progression.leveledUp,
+      kitchen: {
+        xp: dishResult.progression.newXp,
+        tier: dishResult.progression.newTier,
+        nextTierXp: dishResult.progression.nextTierXp,
+      },
     });
   } catch (err) {
     return res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: err.message } });
@@ -188,12 +209,6 @@ export async function postDish(req, res) {
 export async function patchDish(req, res) {
   try {
     const { lines } = req.body || {};
-    const ingredients = await getAllIngredients();
-
-    const valErr = validateDishLines(lines, ingredients);
-    if (valErr) {
-      return res.status(400).json({ error: valErr });
-    }
 
     const dishId = parseInt(req.params.id, 10);
     if (isNaN(dishId)) {
@@ -206,6 +221,17 @@ export async function patchDish(req, res) {
     }
 
     const order = await getOrderById(existingDish.orderId);
+
+    // Fetch kitchen state for tier gating
+    const kitchenRes = await pool.query('SELECT tier FROM kitchens WHERE id = $1', [existingDish.kitchenId]);
+    const kitchenTier = kitchenRes.rows[0]?.tier || 1;
+
+    const ingredients = await getAllIngredients();
+
+    const valErr = validateDishLines(lines, ingredients, kitchenTier);
+    if (valErr) {
+      return res.status(400).json({ error: valErr });
+    }
 
     const scoringResult = score({
       order,

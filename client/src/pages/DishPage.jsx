@@ -43,7 +43,7 @@ export function DishPage() {
           onClick={() => navigateTo('/')}
           style={{ padding: '0.5rem 1rem', backgroundColor: '#1976d2', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
         >
-          ← Back to Dashboard
+          ← Back to Kitchen
         </button>
       </div>
     );
@@ -55,17 +55,30 @@ export function DishPage() {
     <div style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '600px', margin: '0 auto' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h1 style={{ margin: 0 }}>Dish #{dish.id} Details</h1>
-        <a
-          href="/orders"
-          id="back-to-orders-btn"
-          onClick={(e) => {
-            e.preventDefault();
-            navigateTo('/orders');
-          }}
-          style={{ textDecoration: 'none', color: '#1976d2', fontWeight: 'bold' }}
-        >
-          ← Back to Orders
-        </a>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <a
+            href="/"
+            id="back-to-kitchen-btn"
+            onClick={(e) => {
+              e.preventDefault();
+              navigateTo('/');
+            }}
+            style={{ textDecoration: 'none', color: '#1976d2', fontWeight: 'bold' }}
+          >
+            ← Back to Kitchen
+          </a>
+          <a
+            href="/orders"
+            id="back-to-orders-btn"
+            onClick={(e) => {
+              e.preventDefault();
+              navigateTo('/orders');
+            }}
+            style={{ textDecoration: 'none', color: '#1976d2', fontWeight: 'bold' }}
+          >
+            ← Back to Orders
+          </a>
+        </div>
       </header>
 
       <div

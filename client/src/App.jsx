@@ -58,7 +58,10 @@ export function AppContent() {
 
     fetchGameState();
 
-    const handlePopState = () => setPathname(window.location.pathname);
+    const handlePopState = () => {
+      setPathname(window.location.pathname);
+      fetchGameState();
+    };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
@@ -183,7 +186,7 @@ export function AppContent() {
           <h2 style={{ marginTop: 0 }}>
             {kitchen.name} (Chef: {player?.name || 'Head Chef'})
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem' }}>
             <div>
               <strong>Wallet:</strong> <span id="stat-wallet">${kitchen.wallet?.toFixed(2)}</span>
             </div>
@@ -195,6 +198,9 @@ export function AppContent() {
             </div>
             <div>
               <strong>Tier:</strong> <span id="stat-tier">{kitchen.tier}</span>
+            </div>
+            <div>
+              <strong>XP:</strong> <span id="stat-xp">{kitchen.xp || 0}</span>
             </div>
           </div>
         </div>

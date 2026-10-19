@@ -25,6 +25,17 @@ graph TD
 - **Inputs:** `{ breakdown: Breakdown, stars: number, favoriteName?: string, seed?: number|string }`
 - **Outputs:** `reviewText: string`
 
+#### `server/src/domain/progression.js`
+- **`calculateXpForStars(stars)`**
+  - **Inputs:** `stars: number`
+  - **Outputs:** `xpGained: number`
+- **`calculateTier(xp)`**
+  - **Inputs:** `xp: number`
+  - **Outputs:** `{ tier: number, name: string, xp: number, nextTierXp: number|null }`
+- **`getTierName(tier)`**
+  - **Inputs:** `tier: number`
+  - **Outputs:** `name: string`
+
 #### `server/src/db/migrate.js`
 - **Inputs:** `DATABASE_URL: string`
 - **Outputs:** `Promise<void>`
@@ -46,7 +57,7 @@ graph TD
   - **Outputs:** `200 { dish }` | `400/404/500 { error }`
 - **`postDish(req, res)`**
   - **Inputs:** `req.body { orderId: number, lines: Array<{ ingredientId: number, quantityG: number }>, seed?: number }`
-  - **Outputs:** `201 { dishId, stars, review, breakdown, lines }` | `400/404/500 { error }`
+  - **Outputs:** `201 { dishId, stars, review, breakdown, lines, xpGained, kitchen }` | `400/404/500 { error }`
 - **`patchDish(req, res)`**
   - **Inputs:** `req.params.id`, `req.body { lines: Array<{ ingredientId: number, quantityG: number }> }`
   - **Outputs:** `200 { dishId, stars, review, breakdown, lines }` | `400/404/500 { error }`
@@ -57,7 +68,7 @@ graph TD
 #### `server/src/repos/dishes.repo.js`
 - **`createDish(orderId, lines, stars, reviewText, breakdown)`**
   - **Inputs:** `orderId: number`, `lines: Array<{ ingredientId: number, quantityG: number }>`, `stars: number`, `reviewText?: string`, `breakdown?: object`
-  - **Outputs:** `Promise<{ id, orderId, kitchenId, stars, lines, createdAt }>`
+  - **Outputs:** `Promise<{ id, orderId, kitchenId, stars, lines, createdAt, progression }>`
 - **`getAllDishes()`**
   - **Inputs:** None
   - **Outputs:** `Promise<Array<{ id, orderId, kitchenId, stars, lines, createdAt }>>`

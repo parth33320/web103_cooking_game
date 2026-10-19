@@ -69,8 +69,8 @@ export function generateCustomerAndOrder({ kitchenTier = 1, seed = 1001, ingredi
     const favIdx = Math.floor(rng() * ingredients.length);
     favoriteIngredientId = ingredients[favIdx].id;
 
-    // 40% chance of a blacklisted ingredient
-    if (rng() < 0.4 && ingredients.length > 1) {
+    // Allergen / blacklisted ingredient constraint is Tier-gated (unlocked at Tier 3+)
+    if (kitchenTier >= 3 && rng() < 0.4 && ingredients.length > 1) {
       let blackIdx = Math.floor(rng() * ingredients.length);
       while (blackIdx === favIdx) {
         blackIdx = Math.floor(rng() * ingredients.length);
