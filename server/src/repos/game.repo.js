@@ -43,6 +43,12 @@ export async function resetDatabase() {
     await client.query('DELETE FROM kitchens');
     await client.query('DELETE FROM players');
 
+    // Reset SERIAL sequences so default seeded entities start at ID 1 across resets
+    const sequences = ['players_id_seq', 'kitchens_id_seq', 'customers_id_seq', 'orders_id_seq', 'dishes_id_seq'];
+    for (const seq of sequences) {
+      await client.query(`ALTER SEQUENCE ${seq} RESTART WITH 1`).catch(() => {});
+    }
+
     // 1. Seed Default Player (without explicit ID so SERIAL sequence advances)
     const playerRes = await client.query(
       `INSERT INTO players (name)
