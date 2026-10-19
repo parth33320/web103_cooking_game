@@ -27,7 +27,7 @@
 - [x] S2.4 `POST /api/game/next-day`: events from curated library, new Orders, Rent
 - [x] S2.5 Frontend routing complete: dashboard, market, cook page, dish page, redirect after serve
 - [x] S2.6 Slide-out/modal: market-event news + order details
-- [ ] S2.7 Graceful errors: API error middleware + React error boundary + toasts
+- [x] S2.7 Graceful errors: API error middleware + React error boundary + toasts
 
 ### Sprint 3 - Progression and polish (Unit 9: Final)
 - [ ] S3.1 XP, Tier, Tier-gated Constraint Types (allergen, availability)
@@ -76,7 +76,7 @@ Custom (need 2; target 5 so two are safe)
 | Filtering and/or sorting | 3 | S2.1 | tests/api/ingredients.test.js | done |
 | Non-RESTful route (`next-day`, `serve`) | 3 | S2.4 | tests/api/game.test.js | done |
 | Slide-out/modal | 3 | S2.6 | tests/e2e/modal.spec.js | done |
-| Graceful error handling | 3 | S2.7 | e2e/errors.spec.js | todo |
+| Graceful error handling | 3 | S2.7 | tests/e2e/errors.spec.js | done |
 | One-to-one (Player-Kitchen) | 3 | S2.2 | tests/api/game.test.js | done |
 
 Stretch (19)
@@ -111,3 +111,8 @@ Stretch (19)
 - Tests & Evidence: Playwright E2E test tests/e2e/modal.spec.js passing cleanly; screenshot and video saved in docs/evidence/S2.6/.
 - Quality & Verification: All Vitest unit/API/security tests pass (60 tests), standards-check and rubric-check pass cleanly.
 - Next up: S2.7 Graceful errors: API error middleware + React error boundary + toasts.
+- S2.7 Graceful errors shipped: Express API error middleware (notFoundHandler + errorHandler), React ErrorBoundary, Toast presenter, and 404 NotFoundPage.
+- Backend error responses strictly formatted as `{ error: { code, message, details } }`.
+- Route fallback added to App.jsx for unknown paths rendering NotFoundPage, wrapped in ErrorBoundary with Toast notification integration.
+- Unit & E2E Tests: tests/unit/errors.test.js and tests/e2e/errors.spec.js green; screenshot and video evidence in docs/evidence/S2.7/.
+- Next up: S3.1 XP, Tier, Tier-gated Constraint Types (allergen, availability).

@@ -4,6 +4,7 @@ import { logAudit } from './utils/audit.js';
 import { getOrder, postDish, getDishes, getDish, patchDish, removeDish } from './controllers/dishes.controller.js';
 import { listIngredients } from './controllers/ingredients.controller.js';
 import { handleResetGame, handleNewGame, handleGetGameState, handleNextDay } from './controllers/game.controller.js';
+import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 
 export function createApp() {
   const app = express();
@@ -29,6 +30,12 @@ export function createApp() {
   app.post('/api/game/new', handleNewGame);
   app.get('/api/game/state', handleGetGameState);
   app.post('/api/game/next-day', handleNextDay);
+
+  // Not found middleware for unmatched /api routes
+  app.use('/api', notFoundHandler);
+
+  // General error handling middleware
+  app.use(errorHandler);
 
   return app;
 }
