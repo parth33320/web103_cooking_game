@@ -19,7 +19,11 @@ export async function resetDatabase() {
   try {
     await client.query('BEGIN');
 
-    // Check table existence before truncating/deleting optional tables
+    // Clean up dynamic user data
+    await client.query('DELETE FROM dish_ingredients');
+    await client.query('DELETE FROM dishes');
+
+    // Check table existence before deleting from reviews and active_events
     const reviewsTableCheck = await client.query(`
       SELECT 1 FROM information_schema.tables WHERE table_name = 'reviews'
     `);
@@ -34,8 +38,6 @@ export async function resetDatabase() {
       await client.query('DELETE FROM active_events');
     }
 
-    await client.query('DELETE FROM dish_ingredients');
-    await client.query('DELETE FROM dishes');
     await client.query('DELETE FROM orders');
     await client.query('DELETE FROM customers');
     await client.query('DELETE FROM kitchens');
@@ -51,22 +53,7 @@ export async function resetDatabase() {
       }
     }
 
-    // Helper to safely set sequence value in both real Postgres and pg-mem
-    const resetSeq = async (seqName, tableName) => {
-      try {
-        await client.query(`SELECT setval('${seqName}', COALESCE((SELECT MAX(id) FROM ${tableName}), 0) + 1, false)`);
-      } catch (e) {
-        // Fallback or ignore if sequence reset syntax differs
-      }
-    };
-
-    await resetSeq('players_id_seq', 'players');
-    await resetSeq('kitchens_id_seq', 'kitchens');
-    await resetSeq('customers_id_seq', 'customers');
-    await resetSeq('orders_id_seq', 'orders');
-    await resetSeq('dishes_id_seq', 'dishes');
-
-    // 1. Seed Default Player
+    // 1. Seed Default Player (without explicit ID so SERIAL sequence advances)
     const playerRes = await client.query(
       `INSERT INTO players (name)
        VALUES ('Head Chef')
@@ -74,7 +61,7 @@ export async function resetDatabase() {
     );
     const playerRow = playerRes.rows[0];
 
-    // 2. Seed Default Kitchen
+    // 2. Seed Default Kitchen (without explicit ID so SERIAL sequence advances)
     const kitchenRes = await client.query(
       `INSERT INTO kitchens (player_id, name, wallet, reputation, day, tier, xp)
        VALUES ($1, 'Bistro Starter', 100.00, 50, 1, 1, 0)
@@ -93,7 +80,7 @@ export async function resetDatabase() {
       ON CONFLICT (id) DO NOTHING
     `);
 
-    // 4. Seed Starter Customers
+    // 4. Seed Starter Customers (without explicit ID so SERIAL sequence advances)
     const cust1Res = await client.query(`
       INSERT INTO customers (name, job, diet, favorite_ingredient_id)
       VALUES ('Alice the Athlete', 'Fitness Trainer', 'High Protein', 1)
@@ -105,7 +92,7 @@ export async function resetDatabase() {
       RETURNING id, name
     `);
 
-    // 5. Seed Starter Open Orders
+    // 5. Seed Starter Open Orders (without explicit ID so SERIAL sequence advances)
     const order1Res = await client.query(`
       INSERT INTO orders (kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, tolerance_pct, favorite_ingredient_id, status)
       VALUES ($1, $2, 15.00, 30, 20, 5, 10, 1, 'open')
