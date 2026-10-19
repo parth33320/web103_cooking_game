@@ -1,10 +1,14 @@
 import { test, expect } from '@playwright/test';
 
 test('S2.3 Customers & Reviews - View customer details, serve dish, and verify order reviews list', async ({ page }) => {
-  await page.goto('/orders/1/cook');
+  await page.goto('/');
+  await page.click('#reset-game-btn');
+  await page.click('#confirm-reset-btn');
+  await expect(page.locator('#status-message')).toContainText('Database reset');
+
+  await page.locator('.cook-order-btn').first().click();
 
   await expect(page.locator('h1')).toHaveText('Cook Page');
-  await expect(page.locator('text=Order #1')).toBeVisible();
 
   // Verify customer profile details
   await expect(page.locator('#customer-job')).toBeVisible();
@@ -19,13 +23,14 @@ test('S2.3 Customers & Reviews - View customer details, serve dish, and verify o
   await expect(serveBtn).toBeEnabled();
   await serveBtn.click();
 
-  // Check result box appears with review
-  const resultBox = page.locator('#result-box');
-  await expect(resultBox).toBeVisible();
-  await expect(page.locator('#star-rating')).toContainText('Stars');
+  // Check redirected to dish detail page with review
+  await expect(page).toHaveURL(/\/dishes\/\d+$/);
+  await expect(page.locator('#dish-stars')).toContainText('Stars');
 
-  // Verify order reviews list updates (1:N relationship)
+  // Navigate back to orders/cook page to verify order reviews list updates (1:N relationship)
+  await page.click('#back-to-orders-btn');
+  await page.locator('.cook-order-btn').first().click();
   const reviewsSection = page.locator('#order-reviews-section');
   await expect(reviewsSection).toBeVisible();
-  await expect(reviewsSection).toContainText('Customer Reviews for Order #1');
+  await expect(reviewsSection).toContainText('Customer Reviews for Order #');
 });

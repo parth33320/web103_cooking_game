@@ -40,10 +40,10 @@ export function MarketPage() {
           <p style={{ color: '#666' }}>Browse ingredients, compare market vs base prices, and filter by macro goals.</p>
         </div>
         <a
-          href="/orders/1/cook"
+          href="/"
           onClick={(e) => {
             e.preventDefault();
-            window.history.pushState({}, '', '/orders/1/cook');
+            window.history.pushState({}, '', '/');
             window.dispatchEvent(new PopStateEvent('popstate'));
           }}
           style={{ textDecoration: 'none', color: '#1976d2', fontWeight: 'bold' }}
