@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { CookPage } from './pages/CookPage.jsx';
 import { MarketPage } from './pages/MarketPage.jsx';
 import { DishPage } from './pages/DishPage.jsx';
+import { MarketNewsSlideout } from './components/MarketNewsSlideout.jsx';
+import { OrderDetailModal } from './components/OrderDetailModal.jsx';
 
 export function App() {
   const [pathname, setPathname] = useState(window.location.pathname);
@@ -10,6 +12,10 @@ export function App() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [message, setMessage] = useState('');
   const [isNextDayPending, setIsNextDayPending] = useState(false);
+
+  // S2.6 Slide-out & Modal State
+  const [isNewsSlideoutOpen, setIsNewsSlideoutOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   const fetchGameState = () => {
     fetch('/api/game/state')
@@ -64,6 +70,8 @@ export function App() {
           setMessage(`GAME OVER! ${data.gameOverReason}`);
         } else {
           setMessage(`Advanced to Day ${data.kitchen.day}! Rent charged: $${data.rentCharged.toFixed(2)}.`);
+          // S2.6 Auto-open market news slideout on Next Day
+          setIsNewsSlideoutOpen(true);
         }
       } else {
         setMessage('Error advancing to next day.');
@@ -85,10 +93,6 @@ export function App() {
 
   if (pathname.startsWith('/dishes/')) {
     return <DishPage />;
-  }
-
-  if (pathname === '/orders') {
-    // '/orders' maps to the orders/dashboard view
   }
 
   const kitchen = gameState?.kitchen;
@@ -132,27 +136,49 @@ export function App() {
         </div>
       )}
 
-      {activeEvents.length > 0 && (
-        <div
-          id="active-events-section"
-          style={{
-            padding: '1rem',
-            backgroundColor: '#fff8e1',
-            borderRadius: '6px',
-            border: '1px solid #ffe082',
-            marginBottom: '1.5rem',
-          }}
-        >
-          <h3 style={{ marginTop: 0, color: '#f57f17' }}>📰 Active Market Events</h3>
+      <div
+        id="active-events-section"
+        style={{
+          padding: '1rem',
+          backgroundColor: '#fff8e1',
+          borderRadius: '6px',
+          border: '1px solid #ffe082',
+          marginBottom: '1.5rem',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+          <h3 style={{ margin: 0, color: '#f57f17' }}>📰 Active Market Events ({activeEvents.length})</h3>
+          <button
+            id="view-market-news-btn"
+            onClick={() => setIsNewsSlideoutOpen(true)}
+            style={{
+              padding: '0.4rem 0.8rem',
+              backgroundColor: '#f57f17',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '0.85rem',
+              fontWeight: 'bold',
+            }}
+          >
+            View Market News 📰
+          </button>
+        </div>
+        {activeEvents.length > 0 ? (
           <ul style={{ margin: 0, paddingLeft: '1.2rem' }}>
             {activeEvents.map((evt) => (
-              <li key={evt.id} className="active-event-item" style={{ marginBottom: '0.5rem' }}>
+              <li key={evt.id || evt.eventId} className="active-event-item" style={{ marginBottom: '0.5rem' }}>
                 <strong>{evt.name}</strong> ({evt.category}): {evt.multiplier}x price ({evt.daysRemaining} days remaining) - {evt.description}
               </li>
             ))}
           </ul>
-        </div>
-      )}
+        ) : (
+          <p style={{ margin: 0, fontSize: '0.9rem', color: '#666', fontStyle: 'italic' }}>
+            No active market price events today.
+          </p>
+        )}
+      </div>
 
       {orders.length > 0 && (
         <div
@@ -184,25 +210,43 @@ export function App() {
                 <div>
                   <strong>Order #{o.id}</strong> ({o.customerName || 'Customer'}) - Budget: ${o.budget?.toFixed(2)} | Target Protein: {o.targetProteinG}g
                 </div>
-                <a
-                  href={`/orders/${o.id}/cook`}
-                  className="cook-order-btn"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    window.history.pushState({}, '', `/orders/${o.id}/cook`);
-                    setPathname(`/orders/${o.id}/cook`);
-                  }}
-                  style={{
-                    padding: '0.4rem 0.8rem',
-                    backgroundColor: '#2e7d32',
-                    color: '#fff',
-                    textDecoration: 'none',
-                    borderRadius: '4px',
-                    fontSize: '0.9rem',
-                  }}
-                >
-                  Cook Order #{o.id}
-                </a>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <button
+                    className="view-order-details-btn"
+                    id={`view-order-${o.id}-btn`}
+                    onClick={() => setSelectedOrder(o)}
+                    style={{
+                      padding: '0.4rem 0.8rem',
+                      backgroundColor: '#1976d2',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '4px',
+                      fontSize: '0.9rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    View Details
+                  </button>
+                  <a
+                    href={`/orders/${o.id}/cook`}
+                    className="cook-order-btn"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.history.pushState({}, '', `/orders/${o.id}/cook`);
+                      setPathname(`/orders/${o.id}/cook`);
+                    }}
+                    style={{
+                      padding: '0.4rem 0.8rem',
+                      backgroundColor: '#2e7d32',
+                      color: '#fff',
+                      textDecoration: 'none',
+                      borderRadius: '4px',
+                      fontSize: '0.9rem',
+                    }}
+                  >
+                    Cook Order #{o.id}
+                  </a>
+                </div>
               </div>
             ))}
           </div>
@@ -338,6 +382,24 @@ export function App() {
           </div>
         </div>
       )}
+
+      {/* S2.6 Slide-out & Modal Presenters */}
+      <MarketNewsSlideout
+        isOpen={isNewsSlideoutOpen}
+        events={activeEvents}
+        onClose={() => setIsNewsSlideoutOpen(false)}
+      />
+
+      <OrderDetailModal
+        isOpen={Boolean(selectedOrder)}
+        order={selectedOrder}
+        onClose={() => setSelectedOrder(null)}
+        onCook={(orderId) => {
+          setSelectedOrder(null);
+          window.history.pushState({}, '', `/orders/${orderId}/cook`);
+          setPathname(`/orders/${orderId}/cook`);
+        }}
+      />
     </div>
   );
 }
