@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-test('S2.2 New game + reset: Reset DB via modal confirmation', async ({ page }) => {
+test('S2.2 New game + reset: Reset DB via modal confirmation', async ({ page, request }) => {
+  await request.post('/api/game/reset');
   await page.goto('/');
 
   // Verify dashboard title and kitchen stats
