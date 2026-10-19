@@ -125,7 +125,7 @@ export async function getDishById(dishId) {
   const row = result.rows[0];
 
   const linesRes = await pool.query(
-    `SELECT di.ingredient_id, di.quantity_g, i.name as ingredient_name, i.emoji
+    `SELECT di.ingredient_id, di.quantity_g, i.name as ingredient_name, i.emoji, i.base_price_per_100g
      FROM dish_ingredients di
      JOIN ingredients i ON di.ingredient_id = i.id
      WHERE di.dish_id = $1
@@ -133,12 +133,32 @@ export async function getDishById(dishId) {
     [dishId]
   );
 
+  const reviewRes = await pool.query(
+    `SELECT review_text, breakdown
+     FROM reviews
+     WHERE dish_id = $1
+     ORDER BY id DESC
+     LIMIT 1`,
+    [dishId]
+  );
+  const review = reviewRes.rows[0]?.review_text || null;
+  const breakdown = reviewRes.rows[0]?.breakdown || null;
+
   return {
     id: row.id,
     orderId: row.order_id,
     kitchenId: row.kitchen_id,
     stars: parseFloat(row.stars),
+    review,
+    breakdown: typeof breakdown === 'string' ? JSON.parse(breakdown) : breakdown,
     createdAt: row.created_at,
+    ingredients: linesRes.rows.map((l) => ({
+      ingredientId: l.ingredient_id,
+      name: l.ingredient_name,
+      quantityG: l.quantity_g,
+      basePricePer100g: parseFloat(l.base_price_per_100g || 0),
+      emoji: l.emoji,
+    })),
     lines: linesRes.rows.map((l) => ({
       ingredientId: l.ingredient_id,
       quantityG: l.quantity_g,

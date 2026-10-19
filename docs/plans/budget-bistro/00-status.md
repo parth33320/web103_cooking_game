@@ -25,7 +25,7 @@
 - [x] S2.2 New game: auto-seed Kitchen/Wallet/starter data + `POST /api/game/reset`
 - [x] S2.3 Customers + Order generator (seeded RNG), Order -> Reviews 1:N
 - [x] S2.4 `POST /api/game/next-day`: events from curated library, new Orders, Rent
-- [ ] S2.5 Frontend routing complete: dashboard, market, cook page, dish page, redirect after serve
+- [x] S2.5 Frontend routing complete: dashboard, market, cook page, dish page, redirect after serve
 - [ ] S2.6 Slide-out/modal: market-event news + order details
 - [ ] S2.7 Graceful errors: API error middleware + React error boundary + toasts
 
@@ -59,11 +59,11 @@ Baseline (59 pts)
 | 1:N and M:N (join table) in Postgres | 8 | S1.1 (M:N), S2.3 (1:N) | tests/api/orders.test.js | done |
 | RESTful API, full CRUD on one entity (Dish) | 15 | S1.1, S1.3 | tests/api/dishes.test.js | done |
 | Reset DB to default | 4 | S2.2 | tests/api/game.test.js | done |
-| At least one redirection | 3 | S2.5 | e2e/redirect.spec.js | todo |
+| At least one redirection | 3 | S2.5 | tests/e2e/routing.spec.js | done |
 | Same-page interaction | 3 | S1.1 | tests/e2e/tracer.spec.js | done |
-| Dynamic frontend routes (React Router) | 4 | S2.5 | e2e/routes.spec.js | todo |
+| Dynamic frontend routes (React Router) | 4 | S2.5 | tests/e2e/routing.spec.js | done |
 | Hierarchical components (page/presenter) | 6 | S1.1+ | docs/ARCHITECTURE.md | todo |
-| Dynamic routes in frontend AND backend | 3 | S1.1, S2.5 | tests/e2e/tracer.spec.js | done |
+| Dynamic routes in frontend AND backend | 3 | S1.1, S2.5 | tests/e2e/routing.spec.js | done |
 | Deployed on Render, everything working | 8 | S3.3 | e2e/live.spec.js | todo |
 
 Custom (need 2; target 5 so two are safe)
@@ -116,3 +116,8 @@ Stretch (19)
 - Test suite: 15 test files / 60 tests passing cleanly (`npm test`).
 - Standards and rubric checks pass cleanly (`npm run standards-check` and `npm run rubric-check`).
 - Next up: S2.5 Frontend routing complete: dashboard, market, cook page, dish page, redirect after serve.
+- S2.5 Frontend routing complete & Dish Detail page shipped: DishPage (`/dishes/:dishId`) created to render rating, review, score breakdown, and ingredient blueprint.
+- Automatic client-side redirection after serving a dish in CookPage to `/dishes/:dishId`.
+- Route matching added to App.jsx for `/`, `/market`, `/orders`, `/orders/:orderId/cook`, and `/dishes/:dishId`.
+- Playwright E2E tests (`routing.spec.js`) and all Vitest unit/API/security tests green; video evidence saved to `docs/evidence/S2.5/`.
+- Next up: S2.6 Slide-out/modal: market-event news + order details.

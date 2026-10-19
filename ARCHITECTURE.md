@@ -82,3 +82,9 @@ graph TD
 #### `server/src/utils/audit.js`
 - **Inputs:** `{ action: string, details: object }`
 - **Outputs:** `Promise<void>` (appends JSON line to `logs/audit.jsonl`)
+
+### Client Page Components
+
+#### `client/src/pages/DishPage.jsx`
+- **Inputs:** URL route `/dishes/:dishId`
+- **Outputs:** Renders Dish rating (stars), Customer review, Score breakdown, and Ingredients plating blueprint. Provides navigation back to `/orders`.

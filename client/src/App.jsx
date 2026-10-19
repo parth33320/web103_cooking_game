@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { CookPage } from './pages/CookPage.jsx';
 import { MarketPage } from './pages/MarketPage.jsx';
+import { DishPage } from './pages/DishPage.jsx';
 
 export function App() {
   const [pathname, setPathname] = useState(window.location.pathname);
@@ -80,6 +81,14 @@ export function App() {
 
   if (pathname.includes('/cook')) {
     return <CookPage />;
+  }
+
+  if (pathname.startsWith('/dishes/')) {
+    return <DishPage />;
+  }
+
+  if (pathname === '/orders') {
+    // '/orders' maps to the orders/dashboard view
   }
 
   const kitchen = gameState?.kitchen;
