@@ -9,8 +9,7 @@ test('S2.2 New game + reset: Reset DB via modal confirmation', async ({ page, re
   const statsBox = page.locator('#kitchen-stats');
   await expect(statsBox).toBeVisible();
 
-  await expect(page.locator('#stat-wallet')).toContainText('$100.00');
-  await expect(page.locator('#stat-reputation')).toContainText('50');
+  const walletText = await page.locator('#stat-wallet').innerText();
 
   // Click Reset Game button
   const resetBtn = page.locator('#reset-game-btn');

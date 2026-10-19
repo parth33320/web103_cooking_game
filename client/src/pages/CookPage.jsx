@@ -57,8 +57,14 @@ export function CookPage() {
       if (!res.ok) throw new Error(data.error?.message || 'Failed to serve dish');
       setResult(data);
       setStatus('done');
-      // Refresh order details to update reviews list (1:N orders -> reviews)
-      fetchOrderDetails(order.id);
+
+      // Redirect to /dishes/:dishId after serve
+      if (data.dishId) {
+        window.history.pushState({}, '', `/dishes/${data.dishId}`);
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      } else {
+        fetchOrderDetails(order.id);
+      }
     } catch (err) {
       setError(err.message);
       setStatus('idle');
