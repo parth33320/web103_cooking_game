@@ -203,9 +203,9 @@ export function AppContent() {
   const activeEvents = gameState?.activeEvents || [];
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '800px', margin: '0 auto' }}>
+    <div id="dashboard-page" style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '800px', margin: '0 auto' }}>
       <BuggyComponent />
-      <h1>
+      <h1 id="app-header">
         Budget Bistro 🍳 <span id="equipped-badge">{equippedBadge}</span>
       </h1>
       <p id="health-status">API Status: {health}</p>

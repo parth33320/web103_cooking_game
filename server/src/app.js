@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'node:path';
+import fs from 'node:fs';
 import { logAudit } from './utils/audit.js';
 import { getOrder, postDish, getDishes, getDish, patchDish, removeDish } from './controllers/dishes.controller.js';
 import { listIngredients } from './controllers/ingredients.controller.js';
@@ -34,6 +36,18 @@ export function createApp() {
   app.post('/api/game/new', handleNewGame);
   app.get('/api/game/state', handleGetGameState);
   app.post('/api/game/next-day', handleNextDay);
+
+  // Serve static client assets in production if client/dist exists
+  const distPath = path.resolve(process.cwd(), 'client/dist');
+  if (fs.existsSync(distPath)) {
+    app.use(express.static(distPath));
+    app.get('*', (req, res, next) => {
+      if (req.path.startsWith('/api')) {
+        return next();
+      }
+      res.sendFile(path.join(distPath, 'index.html'));
+    });
+  }
 
   // Not found middleware for unmatched /api routes
   app.use('/api', notFoundHandler);
