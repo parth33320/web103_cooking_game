@@ -32,7 +32,7 @@
 ### Sprint 3 - Progression and polish (Unit 9: Final)
 - [x] S3.1 XP, Tier, Tier-gated Constraint Types (allergen, availability)
 - [x] S3.2 Cosmetics shop (M:N join with `equipped`), UI theme switch
-- [ ] S3.3 Deploy to Render (render.yaml, env vars, health check, Playwright smoke vs live URL)
+- [x] S3.3 Deploy to Render (render.yaml, env vars, health check, Playwright smoke vs live URL)
 - [ ] S3.4 Stretch: spinner, disabled buttons, toasts on all async actions
 - [ ] S3.5 Endgame v1: Suppliers + Trust (M:N), VIP multi-constraint orders
 - [ ] S3.6 Final: README feature checklist, per-feature GIFs, full run-through GIF, milestone5.md
@@ -64,7 +64,7 @@ Baseline (59 pts)
 | Dynamic frontend routes (React Router) | 4 | S2.5 | tests/e2e/routing.spec.js | done |
 | Hierarchical components (page/presenter) | 6 | S1.1+ | docs/ARCHITECTURE.md | todo |
 | Dynamic routes in frontend AND backend | 3 | S1.1, S2.5 | tests/e2e/routing.spec.js | done |
-| Deployed on Render, everything working | 8 | S3.3 | e2e/live.spec.js | todo |
+| Deployed on Render, everything working | 8 | S3.3 | tests/e2e/live.spec.js | done |
 
 Custom (need 2; target 5 so two are safe)
 
@@ -116,3 +116,8 @@ Stretch (19)
 - CosmeticsPage.jsx and App.jsx updated to support theme switching via CSS class, badge display, and shop customization.
 - Tests & Evidence: Vitest unit/API/security tests (75 total) and Playwright E2E test tests/e2e/cosmetics.spec.js green; screenshot & video saved in docs/evidence/S3.2/.
 - Next up: S3.3 Deploy to Render (render.yaml, env vars, health check, Playwright smoke vs live URL).
+- S3.3 Deploy configuration shipped: added render.yaml blueprint, package.json start script, docs/external/render.md, and SPA static asset fallback in server/src/app.js.
+- Express server now serves client/dist built SPA files when present and handles SPA route fallbacks to index.html.
+- Live deployment smoke test suite created in tests/e2e/live.spec.js verifying /api/health endpoint and frontend rendering.
+- Tests & Evidence: all unit, integration, security, and Playwright E2E tests green; screenshot and video evidence in docs/evidence/S3.3/.
+- Next up: S3.4 Stretch: spinner, disabled buttons, toasts on all async actions.

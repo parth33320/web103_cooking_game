@@ -33,8 +33,7 @@ test('S3.2 Cosmetics Shop - Purchase and equip theme', async ({ page }) => {
   await expect(page.locator('#cosmetic-card-2 button')).toContainText('Equipped ✓');
 
   // Verify body class updated to theme-neon
-  const bodyClass = await page.evaluate(() => document.body.className);
-  expect(bodyClass).toBe('theme-neon');
+  await expect.poll(async () => page.evaluate(() => document.body.className)).toBe('theme-neon');
 
   // Save screenshot evidence
   await page.screenshot({ path: 'docs/evidence/S3.2/screenshot.png', fullPage: true });
