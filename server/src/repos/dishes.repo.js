@@ -1,4 +1,5 @@
 import { pool } from '../db/index.js';
+import { calculateXpForStars, calculateTier } from '../domain/progression.js';
 
 /**
  * Dishes Repository
@@ -11,6 +12,7 @@ import { pool } from '../db/index.js';
  *   - breakdown?: object
  * Outputs:
  *   - dish: { id, orderId, stars, lines: Array<{ ingredientId, quantityG }> }
+ *   - progression: { xpGained, oldXp, newXp, oldTier, newTier, leveledUp }
  */
 export async function createDish(orderId, lines, stars, reviewText = null, breakdown = null) {
   const client = await pool.connect();
@@ -51,6 +53,20 @@ export async function createDish(orderId, lines, stars, reviewText = null, break
       );
     }
 
+    // Progression XP & Tier Calculation
+    const kitchenRes = await client.query('SELECT id, xp, tier FROM kitchens WHERE id = $1 FOR UPDATE', [kitchenId]);
+    const kitchenRow = kitchenRes.rows[0] || { xp: 0, tier: 1 };
+    const oldXp = parseInt(kitchenRow.xp || 0, 10);
+    const oldTier = parseInt(kitchenRow.tier || 1, 10);
+
+    const xpGained = calculateXpForStars(stars);
+    const newXp = oldXp + xpGained;
+    const tierCalc = calculateTier(newXp);
+    const newTier = tierCalc.tier;
+    const leveledUp = newTier > oldTier;
+
+    await client.query('UPDATE kitchens SET xp = $1, tier = $2 WHERE id = $3', [newXp, newTier, kitchenId]);
+
     await client.query('COMMIT');
 
     return {
@@ -60,6 +76,15 @@ export async function createDish(orderId, lines, stars, reviewText = null, break
       stars: parseFloat(dish.stars),
       lines: insertedLines,
       createdAt: dish.created_at,
+      progression: {
+        xpGained,
+        oldXp,
+        newXp,
+        oldTier,
+        newTier,
+        leveledUp,
+        nextTierXp: tierCalc.nextTierXp,
+      },
     };
   } catch (err) {
     await client.query('ROLLBACK');

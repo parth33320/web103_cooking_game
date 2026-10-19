@@ -30,7 +30,7 @@
 - [x] S2.7 Graceful errors: API error middleware + React error boundary + toasts
 
 ### Sprint 3 - Progression and polish (Unit 9: Final)
-- [ ] S3.1 XP, Tier, Tier-gated Constraint Types (allergen, availability)
+- [x] S3.1 XP, Tier, Tier-gated Constraint Types (allergen, availability)
 - [ ] S3.2 Cosmetics shop (M:N join with `equipped`), UI theme switch
 - [ ] S3.3 Deploy to Render (render.yaml, env vars, health check, Playwright smoke vs live URL)
 - [ ] S3.4 Stretch: spinner, disabled buttons, toasts on all async actions
@@ -81,15 +81,15 @@ Custom (need 2; target 5 so two are safe)
 
 Stretch (19)
 
-| Rubric item | Pts | Slice | Status |
-|---|---|---|---|
-| Login + protected routes | 3 | S4.1 | todo |
-| Restrict options dynamically (can't buy what you can't afford / locked tier) | 3 | S3.1 | todo |
-| Spinner while loading | 2 | S3.4 | todo |
-| Disable buttons/inputs during submit | 2 | S3.4 | todo |
-| Disable buttons after click (75%+ of buttons) | 2 | S3.4 | todo |
-| Image upload to cloud storage | 4 | not planned (needs real upload, not URL/preset) | skip |
-| Toast messages | 3 | S2.7/S3.4 | todo |
+| Rubric item | Pts | Slice | Test file | Status |
+|---|---|---|---|---|
+| Login + protected routes | 3 | S4.1 | | todo |
+| Restrict options dynamically (can't buy what you can't afford / locked tier) | 3 | S3.1 | tests/security/progression.security.test.js | done |
+| Spinner while loading | 2 | S3.4 | | todo |
+| Disable buttons/inputs during submit | 2 | S3.4 | | todo |
+| Disable buttons after click (75%+ of buttons) | 2 | S3.4 | | todo |
+| Image upload to cloud storage | 4 | not planned (needs real upload, not URL/preset) | | skip |
+| Toast messages | 3 | S2.7/S3.4 | | todo |
 
 ## Milestone deliverables (human-owned; Jules may draft, team must finalize)
 
@@ -101,11 +101,6 @@ Stretch (19)
 
 ## Handoff log (append newest at bottom; 5 lines max each)
 
-- S2.5 Frontend routing complete & Dish Detail page shipped: DishPage (`/dishes/:dishId`) created to render rating, review, score breakdown, and ingredient blueprint.
-- Automatic client-side redirection after serving a dish in CookPage to `/dishes/:dishId`.
-- Route matching added to App.jsx for `/`, `/market`, `/orders`, `/orders/:orderId/cook`, and `/dishes/:dishId`.
-- Playwright E2E tests (`routing.spec.js`) and all Vitest unit/API/security tests green; video evidence saved to `docs/evidence/S2.5/`.
-- Next up: S2.6 Slide-out/modal: market-event news + order details.
 - S2.6 Slide-out/modal shipped: MarketNewsSlideout drawer presenter for market event news and OrderDetailModal presenter for order details.
 - Trigger buttons added on active events section ("View Market News") and order cards ("View Details"). Auto-opens MarketNewsSlideout on Next Day.
 - Tests & Evidence: Playwright E2E test tests/e2e/modal.spec.js passing cleanly; screenshot and video saved in docs/evidence/S2.6/.
@@ -116,3 +111,8 @@ Stretch (19)
 - Route fallback added to App.jsx for unknown paths rendering NotFoundPage, wrapped in ErrorBoundary with Toast notification integration.
 - Unit & E2E Tests: tests/unit/errors.test.js and tests/e2e/errors.spec.js green; screenshot and video evidence in docs/evidence/S2.7/.
 - Next up: S3.1 XP, Tier, Tier-gated Constraint Types (allergen, availability).
+- S3.1 XP, Tier, and Tier-gated Constraint Types shipped: added server/src/domain/progression.js pure module and migration 005_tier_gating.sql.
+- XP awarded on dish submission and kitchen XP & Tier updated in Postgres; tier-gated allergen constraints generated only at Tier 3+.
+- UI updated in App.jsx (XP display in stats header), MarketPage.jsx, and CookPage.jsx (disabled/locked buttons with 🔒 badges for tier-locked ingredients).
+- Tests & Evidence: unit/API/security tests (68 total) and Playwright E2E test tests/e2e/progression.spec.js green; screenshot and video in docs/evidence/S3.1/.
+- Next up: S3.2 Cosmetics shop (M:N join with equipped), UI theme switch.

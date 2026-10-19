@@ -138,7 +138,7 @@ export async function createCustomerAndOrder({ kitchenId = 1, customer, order })
  * Ingredients Repository
  *
  * Inputs: options object { category?, sort?, order? }
- * Outputs: array of ingredient objects
+ * Outputs: array of ingredient objects with minTier field
  */
 export async function getIngredients({ category, sort, order } = {}) {
   const queryParams = [];
@@ -161,7 +161,8 @@ export async function getIngredients({ category, sort, order } = {}) {
   const sortDirection = order === 'desc' ? 'DESC' : 'ASC';
 
   const sql = `
-    SELECT id, name, category, base_price_per_100g, protein_g_per_100g, carbs_g_per_100g, fat_g_per_100g, emoji
+    SELECT id, name, category, base_price_per_100g, protein_g_per_100g, carbs_g_per_100g, fat_g_per_100g, emoji,
+           COALESCE(min_tier, 1) as min_tier
     FROM ingredients
     ${whereSql}
     ORDER BY ${sortColumn} ${sortDirection}, id ASC
@@ -177,6 +178,7 @@ export async function getIngredients({ category, sort, order } = {}) {
     carbsGPer100g: row.carbs_g_per_100g,
     fatGPer100g: row.fat_g_per_100g,
     emoji: row.emoji,
+    minTier: parseInt(row.min_tier || 1, 10),
   }));
 }
 

@@ -7,8 +7,18 @@ export function CookPage() {
   const [result, setResult] = useState(null);
   const [status, setStatus] = useState('loading');
   const [error, setError] = useState(null);
+  const [kitchenTier, setKitchenTier] = useState(1);
 
   const fetchOrderDetails = (orderId) => {
+    fetch('/api/game/state')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.kitchen) {
+          setKitchenTier(data.kitchen.tier || 1);
+        }
+      })
+      .catch(() => {});
+
     fetch(`/api/orders/${orderId}`)
       .then((res) => {
         if (!res.ok) throw new Error('Order not found');
@@ -33,7 +43,8 @@ export function CookPage() {
     fetchOrderDetails(orderId);
   }, []);
 
-  const toggleIngredient = (id) => {
+  const toggleIngredient = (id, isLocked) => {
+    if (isLocked) return;
     if (selectedIngredients.includes(id)) {
       setSelectedIngredients(selectedIngredients.filter((i) => i !== id));
     } else {
@@ -96,21 +107,25 @@ export function CookPage() {
       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
         {ingredients.map((ing) => {
           const isSelected = selectedIngredients.includes(ing.id);
+          const isLocked = ing.minTier && ing.minTier > kitchenTier;
           return (
             <button
               key={ing.id}
               data-testid={`ingredient-${ing.id}`}
-              onClick={() => toggleIngredient(ing.id)}
+              disabled={isLocked}
+              onClick={() => toggleIngredient(ing.id, isLocked)}
               style={{
                 padding: '0.75rem 1rem',
                 border: isSelected ? '2px solid #2e7d32' : '1px solid #ccc',
-                backgroundColor: isSelected ? '#e8f5e9' : '#fff',
+                backgroundColor: isLocked ? '#e0e0e0' : isSelected ? '#e8f5e9' : '#fff',
+                color: isLocked ? '#777' : '#000',
                 borderRadius: '6px',
-                cursor: 'pointer',
+                cursor: isLocked ? 'not-allowed' : 'pointer',
                 fontSize: '1rem',
+                opacity: isLocked ? 0.6 : 1,
               }}
             >
-              {ing.emoji} {ing.name} (${ing.basePricePer100g}/100g)
+              {ing.emoji} {ing.name} (${ing.basePricePer100g}/100g) {isLocked ? `🔒 Tier ${ing.minTier}` : ''}
             </button>
           );
         })}

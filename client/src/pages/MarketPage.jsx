@@ -7,8 +7,18 @@ export function MarketPage() {
   const [order, setOrder] = useState('asc');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [kitchenTier, setKitchenTier] = useState(1);
 
   useEffect(() => {
+    fetch('/api/game/state')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.kitchen) {
+          setKitchenTier(data.kitchen.tier || 1);
+        }
+      })
+      .catch(() => {});
+
     let url = `/api/ingredients?sort=${sort}&order=${order}`;
     if (category && category !== 'all') {
       url += `&category=${encodeURIComponent(category)}`;
@@ -30,7 +40,7 @@ export function MarketPage() {
       });
   }, [category, sort, order]);
 
-  const categories = ['all', 'protein', 'carbs', 'vegetable'];
+  const categories = ['all', 'protein', 'carbs', 'vegetable', 'fat'];
 
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '900px', margin: '0 auto' }}>
@@ -142,49 +152,73 @@ export function MarketPage() {
             gap: '1.5rem',
           }}
         >
-          {ingredients.map((ing) => (
-            <div
-              key={ing.id}
-              data-testid={`ingredient-card-${ing.id}`}
-              style={{
-                border: '1px solid #e0e0e0',
-                borderRadius: '8px',
-                padding: '1.25rem',
-                backgroundColor: '#fff',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-              }}
-            >
-              <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{ing.emoji || '🥗'}</div>
-              <h3 style={{ margin: '0 0 0.25rem 0' }}>{ing.name}</h3>
-              <span
+          {ingredients.map((ing) => {
+            const isLocked = ing.minTier && ing.minTier > kitchenTier;
+            return (
+              <div
+                key={ing.id}
+                data-testid={`ingredient-card-${ing.id}`}
+                className={`ingredient-card ${isLocked ? 'locked' : ''}`}
                 style={{
-                  fontSize: '0.8rem',
-                  textTransform: 'uppercase',
-                  color: '#666',
-                  backgroundColor: '#eee',
-                  padding: '0.2rem 0.5rem',
-                  borderRadius: '4px',
-                  display: 'inline-block',
-                  marginBottom: '1rem',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '8px',
+                  padding: '1.25rem',
+                  backgroundColor: isLocked ? '#f0f0f0' : '#fff',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                  opacity: isLocked ? 0.65 : 1,
+                  position: 'relative',
                 }}
               >
-                {ing.category}
-              </span>
+                {isLocked && (
+                  <div
+                    className="tier-lock-badge"
+                    style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                      backgroundColor: '#d32f2f',
+                      color: '#fff',
+                      fontSize: '0.75rem',
+                      fontWeight: 'bold',
+                      padding: '0.2rem 0.5rem',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    🔒 Tier {ing.minTier} Required
+                  </div>
+                )}
+                <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{ing.emoji || '🥗'}</div>
+                <h3 style={{ margin: '0 0 0.25rem 0' }}>{ing.name}</h3>
+                <span
+                  style={{
+                    fontSize: '0.8rem',
+                    textTransform: 'uppercase',
+                    color: '#666',
+                    backgroundColor: '#eee',
+                    padding: '0.2rem 0.5rem',
+                    borderRadius: '4px',
+                    display: 'inline-block',
+                    marginBottom: '1rem',
+                  }}
+                >
+                  {ing.category}
+                </span>
 
-              <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: '0.75rem', marginTop: '0.5rem' }}>
-                <p style={{ margin: '0.25rem 0', fontWeight: 'bold', color: '#2e7d32' }}>
-                  Market Price: ${ing.basePricePer100g.toFixed(2)} / 100g
-                </p>
-                <p style={{ margin: '0.25rem 0', fontSize: '0.85rem', color: '#888' }}>
-                  Base Price: ${ing.basePricePer100g.toFixed(2)}
-                </p>
-                <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: '#444' }}>
-                  <span>💪 {ing.proteinGPer100g}g Protein</span> | <span>🍞 {ing.carbsGPer100g}g Carbs</span> |{' '}
-                  <span>🥑 {ing.fatGPer100g}g Fat</span>
+                <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: '0.75rem', marginTop: '0.5rem' }}>
+                  <p style={{ margin: '0.25rem 0', fontWeight: 'bold', color: isLocked ? '#777' : '#2e7d32' }}>
+                    Market Price: ${ing.basePricePer100g.toFixed(2)} / 100g
+                  </p>
+                  <p style={{ margin: '0.25rem 0', fontSize: '0.85rem', color: '#888' }}>
+                    Base Price: ${ing.basePricePer100g.toFixed(2)}
+                  </p>
+                  <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: '#444' }}>
+                    <span>💪 {ing.proteinGPer100g}g Protein</span> | <span>🍞 {ing.carbsGPer100g}g Carbs</span> |{' '}
+                    <span>🥑 {ing.fatGPer100g}g Fat</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
