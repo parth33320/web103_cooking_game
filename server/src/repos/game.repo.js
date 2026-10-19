@@ -23,7 +23,7 @@ export async function resetDatabase() {
     await client.query('DELETE FROM dish_ingredients');
     await client.query('DELETE FROM dishes');
 
-    // Check table existence before deleting from reviews and active_events
+    // Check table existence before deleting from optional tables
     const reviewsTableCheck = await client.query(`
       SELECT 1 FROM information_schema.tables WHERE table_name = 'reviews'
     `);
@@ -36,6 +36,13 @@ export async function resetDatabase() {
     `);
     if (activeEventsTableCheck.rows.length > 0) {
       await client.query('DELETE FROM active_events');
+    }
+
+    const kitchenCosmeticsTableCheck = await client.query(`
+      SELECT 1 FROM information_schema.tables WHERE table_name = 'kitchen_cosmetics'
+    `);
+    if (kitchenCosmeticsTableCheck.rows.length > 0) {
+      await client.query('DELETE FROM kitchen_cosmetics');
     }
 
     await client.query('DELETE FROM orders');
@@ -69,6 +76,16 @@ export async function resetDatabase() {
       [playerRow.id]
     );
     const kitchenRow = kitchenRes.rows[0];
+
+    // 2b. Seed default equipped cosmetics for starter kitchen
+    if (kitchenCosmeticsTableCheck.rows.length > 0) {
+      await client.query(
+        `INSERT INTO kitchen_cosmetics (kitchen_id, cosmetic_id, equipped)
+         VALUES ($1, 1, true), ($1, 5, true), ($1, 8, true)
+         ON CONFLICT DO NOTHING`,
+        [kitchenRow.id]
+      );
+    }
 
     // 3. Ensure Default Ingredients exist
     await client.query(`

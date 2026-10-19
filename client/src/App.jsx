@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { CookPage } from './pages/CookPage.jsx';
 import { MarketPage } from './pages/MarketPage.jsx';
 import { DishPage } from './pages/DishPage.jsx';
+import { CosmeticsPage } from './pages/CosmeticsPage.jsx';
 import { NotFoundPage } from './pages/NotFoundPage.jsx';
 import { MarketNewsSlideout } from './components/MarketNewsSlideout.jsx';
 import { OrderDetailModal } from './components/OrderDetailModal.jsx';
 import { ErrorBoundary } from './components/ErrorBoundary.jsx';
 import { Toast } from './components/Toast.jsx';
+import { getCosmetics } from './api/cosmetics.js';
 
 /**
  * Component to throw an error when ?triggerError=true query param is present (for testing ErrorBoundary)
@@ -27,6 +29,10 @@ export function AppContent() {
   const [message, setMessage] = useState('');
   const [isNextDayPending, setIsNextDayPending] = useState(false);
 
+  // S3.2 Cosmetics State
+  const [equippedTheme, setEquippedTheme] = useState('theme-default');
+  const [equippedBadge, setEquippedBadge] = useState('🧑‍🍳');
+
   // S2.6 Slide-out & Modal State
   const [isNewsSlideoutOpen, setIsNewsSlideoutOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -38,13 +44,25 @@ export function AppContent() {
     setToast({ message: msg, type });
   };
 
-  const fetchGameState = () => {
-    fetch('/api/game/state')
-      .then((res) => res.json())
-      .then((data) => setGameState(data))
-      .catch(() => {
-        triggerToast('Failed to fetch game state', 'error');
-      });
+  const fetchCosmeticsTheme = async () => {
+    try {
+      const data = await getCosmetics();
+      const themeItem = data.cosmetics?.find((c) => c.type === 'theme' && c.equipped);
+      const badgeItem = data.cosmetics?.find((c) => c.type === 'badge' && c.equipped);
+      if (themeItem) setEquippedTheme(themeItem.value);
+      if (badgeItem) setEquippedBadge(badgeItem.value);
+    } catch {}
+  };
+
+  const fetchGameState = async () => {
+    try {
+      const res = await fetch('/api/game/state');
+      const data = await res.json();
+      setGameState(data);
+      await fetchCosmeticsTheme();
+    } catch {
+      triggerToast('Failed to fetch game state', 'error');
+    }
   };
 
   useEffect(() => {
@@ -66,6 +84,13 @@ export function AppContent() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  // Update body class for CSS theme styling when equippedTheme changes
+  useEffect(() => {
+    if (equippedTheme) {
+      document.body.className = equippedTheme;
+    }
+  }, [equippedTheme]);
+
   const handleReset = async () => {
     try {
       const res = await fetch('/api/game/reset', { method: 'POST' });
@@ -75,6 +100,7 @@ export function AppContent() {
         setMessage('Database reset to default seed state!');
         triggerToast('Kitchen database reset successfully!', 'success');
         setShowConfirmModal(false);
+        await fetchCosmeticsTheme();
       } else {
         setMessage('Failed to reset database.');
         triggerToast('Failed to reset database', 'error');
@@ -131,6 +157,16 @@ export function AppContent() {
     );
   }
 
+  if (pathname === '/cosmetics' || pathname === '/shop') {
+    return (
+      <>
+        <BuggyComponent />
+        <CosmeticsPage kitchen={gameState?.kitchen} onRefreshKitchen={fetchGameState} />
+        <Toast toast={toast} onClose={() => setToast(null)} />
+      </>
+    );
+  }
+
   if (pathname.includes('/cook')) {
     return (
       <>
@@ -169,7 +205,9 @@ export function AppContent() {
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '800px', margin: '0 auto' }}>
       <BuggyComponent />
-      <h1>Budget Bistro 🍳</h1>
+      <h1>
+        Budget Bistro 🍳 <span id="equipped-badge">{equippedBadge}</span>
+      </h1>
       <p id="health-status">API Status: {health}</p>
 
       {kitchen && (
@@ -372,6 +410,25 @@ export function AppContent() {
           }}
         >
           Go to Market 🛒
+        </a>
+        <a
+          href="/cosmetics"
+          id="cosmetics-shop-link"
+          onClick={(e) => {
+            e.preventDefault();
+            window.history.pushState({}, '', '/cosmetics');
+            setPathname('/cosmetics');
+          }}
+          style={{
+            display: 'inline-block',
+            padding: '0.75rem 1.25rem',
+            backgroundColor: '#0288d1',
+            color: '#fff',
+            textDecoration: 'none',
+            borderRadius: '6px',
+          }}
+        >
+          Cosmetics Shop 🎨
         </a>
         <button
           id="reset-game-btn"

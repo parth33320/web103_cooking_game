@@ -45,6 +45,17 @@ graph TD
   - **Inputs:** `req.query { category?: string, sort?: 'price'|'protein', order?: 'asc'|'desc' }`
   - **Outputs:** `200 { ingredients: Array }` | `400/500 { error }`
 
+#### `server/src/controllers/cosmetics.controller.js`
+- **`getCosmetics(req, res, next)`**
+  - **Inputs:** None
+  - **Outputs:** `200 { cosmetics: Array }` | `500 { error }`
+- **`handlePurchaseCosmetic(req, res, next)`**
+  - **Inputs:** `req.params.id`
+  - **Outputs:** `200 { message, cosmetic, wallet }` | `400/404/500 { error }`
+- **`handleEquipCosmetic(req, res, next)`**
+  - **Inputs:** `req.params.id`
+  - **Outputs:** `200 { message, cosmeticId, type, equipped: true }` | `400/404/500 { error }`
+
 #### `server/src/controllers/dishes.controller.js`
 - **`getOrder(req, res)`**
   - **Inputs:** `req.params.id`
@@ -64,6 +75,17 @@ graph TD
 - **`removeDish(req, res)`**
   - **Inputs:** `req.params.id`
   - **Outputs:** `204 No Content` | `400/404/500 { error }`
+
+#### `server/src/repos/cosmetics.repo.js`
+- **`listCosmetics(kitchenId)`**
+  - **Inputs:** `kitchenId?: number`
+  - **Outputs:** `Promise<Array<{ id, name, type, price, unlockTier, value, description, unlocked, equipped }>>`
+- **`purchaseCosmetic(kitchenId, cosmeticId)`**
+  - **Inputs:** `kitchenId?: number`, `cosmeticId: number`
+  - **Outputs:** `Promise<{ cosmetic, wallet, tier }>`
+- **`equipCosmetic(kitchenId, cosmeticId)`**
+  - **Inputs:** `kitchenId?: number`, `cosmeticId: number`
+  - **Outputs:** `Promise<{ cosmeticId, type, equipped: true }>`
 
 #### `server/src/repos/dishes.repo.js`
 - **`createDish(orderId, lines, stars, reviewText, breakdown)`**
@@ -99,3 +121,7 @@ graph TD
 #### `client/src/pages/DishPage.jsx`
 - **Inputs:** URL route `/dishes/:dishId`
 - **Outputs:** Renders Dish rating (stars), Customer review, Score breakdown, and Ingredients plating blueprint. Provides navigation back to `/orders`.
+
+#### `client/src/pages/CosmeticsPage.jsx`
+- **Inputs:** URL route `/cosmetics` or `/shop`, props `{ kitchen, onRefreshKitchen }`
+- **Outputs:** Renders Cosmetics shop categories (themes, plate styles, badges), price/unlock tier requirements, and purchase/equip action controls.

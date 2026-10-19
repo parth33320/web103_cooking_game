@@ -1,10 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 /**
  * Toast notification component
  * Inputs: toast { message, type }, onClose ()
  */
 export function Toast({ toast, onClose }) {
+  useEffect(() => {
+    if (toast && toast.message) {
+      const timer = setTimeout(() => {
+        if (onClose) onClose();
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast, onClose]);
+
   if (!toast || !toast.message) return null;
 
   const isError = toast.type === 'error';
@@ -15,6 +24,7 @@ export function Toast({ toast, onClose }) {
   return (
     <div
       id="toast-container"
+      className="toast"
       style={{
         position: 'fixed',
         bottom: '20px',
