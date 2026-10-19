@@ -43,10 +43,14 @@ export async function resetDatabase() {
     await client.query('DELETE FROM kitchens');
     await client.query('DELETE FROM players');
 
-    // Reset SERIAL sequences so default seeded entities start at ID 1 across resets
-    const sequences = ['players_id_seq', 'kitchens_id_seq', 'customers_id_seq', 'orders_id_seq', 'dishes_id_seq'];
-    for (const seq of sequences) {
-      await client.query(`ALTER SEQUENCE ${seq} RESTART WITH 1`).catch(() => {});
+    // Reset primary key sequences across supported Postgres / pg-mem environments
+    const tablesWithSeq = ['players', 'kitchens', 'customers', 'orders', 'dishes'];
+    for (const tbl of tablesWithSeq) {
+      try {
+        await client.query(`ALTER SEQUENCE ${tbl}_id_seq RESTART WITH 1`);
+      } catch (e) {
+        // Ignore if sequence name differs or ALTER SEQUENCE isn't supported in memory driver
+      }
     }
 
     // 1. Seed Default Player (without explicit ID so SERIAL sequence advances)
