@@ -31,7 +31,7 @@
 
 ### Sprint 3 - Progression and polish (Unit 9: Final)
 - [x] S3.1 XP, Tier, Tier-gated Constraint Types (allergen, availability)
-- [ ] S3.2 Cosmetics shop (M:N join with `equipped`), UI theme switch
+- [x] S3.2 Cosmetics shop (M:N join with `equipped`), UI theme switch
 - [ ] S3.3 Deploy to Render (render.yaml, env vars, health check, Playwright smoke vs live URL)
 - [ ] S3.4 Stretch: spinner, disabled buttons, toasts on all async actions
 - [ ] S3.5 Endgame v1: Suppliers + Trust (M:N), VIP multi-constraint orders
@@ -56,7 +56,7 @@ Baseline (59 pts)
 | Rubric item | Pts | Slice | Test file | Status |
 |---|---|---|---|---|
 | Express backend + React frontend | 5 | S0.1/S1.1 | tests/api/health.test.js | done |
-| 1:N and M:N (join table) in Postgres | 8 | S1.1 (M:N), S2.3 (1:N) | tests/api/dishes.test.js | done |
+| 1:N and M:N (join table) in Postgres | 8 | S1.1 (M:N), S2.3 (1:N), S3.2 (M:N) | tests/api/cosmetics.test.js | done |
 | RESTful API, full CRUD on one entity (Dish) | 15 | S1.1, S1.3 | tests/api/dishes.test.js | done |
 | Reset DB to default | 4 | S2.2 | tests/api/game.test.js | done |
 | At least one redirection | 3 | S2.5 | tests/e2e/routing.spec.js | done |
@@ -71,7 +71,7 @@ Custom (need 2; target 5 so two are safe)
 | Rubric item | Pts | Slice | Test file | Status |
 |---|---|---|---|---|
 | POST/PATCH validated before DB write | 3 | S1.3 | tests/security/dishes.security.test.js | done |
-| Unique field in join table (`quantity_g`) | 3 | S1.1/S1.3 | tests/api/dishes.test.js | done |
+| Unique field in join table (`quantity_g`, `equipped`) | 3 | S1.1/S1.3/S3.2 | tests/api/cosmetics.test.js | done |
 | Data auto-generated on event (new game seed) | 3 | S2.2 | tests/api/game.test.js | done |
 | Filtering and/or sorting | 3 | S2.1 | tests/api/ingredients.test.js | done |
 | Non-RESTful route (`next-day`, `serve`) | 3 | S2.4 | tests/api/game.test.js | done |
@@ -84,7 +84,7 @@ Stretch (19)
 | Rubric item | Pts | Slice | Test file | Status |
 |---|---|---|---|---|
 | Login + protected routes | 3 | S4.1 | | todo |
-| Restrict options dynamically (can't buy what you can't afford / locked tier) | 3 | S3.1 | tests/security/progression.security.test.js | done |
+| Restrict options dynamically (can't buy what you can't afford / locked tier) | 3 | S3.1/S3.2 | tests/security/cosmetics.security.test.js | done |
 | Spinner while loading | 2 | S3.4 | | todo |
 | Disable buttons/inputs during submit | 2 | S3.4 | | todo |
 | Disable buttons after click (75%+ of buttons) | 2 | S3.4 | | todo |
@@ -101,11 +101,6 @@ Stretch (19)
 
 ## Handoff log (append newest at bottom; 5 lines max each)
 
-- S2.6 Slide-out/modal shipped: MarketNewsSlideout drawer presenter for market event news and OrderDetailModal presenter for order details.
-- Trigger buttons added on active events section ("View Market News") and order cards ("View Details"). Auto-opens MarketNewsSlideout on Next Day.
-- Tests & Evidence: Playwright E2E test tests/e2e/modal.spec.js passing cleanly; screenshot and video saved in docs/evidence/S2.6/.
-- Quality & Verification: All Vitest unit/API/security tests pass (60 tests), standards-check and rubric-check pass cleanly.
-- Next up: S2.7 Graceful errors: API error middleware + React error boundary + toasts.
 - S2.7 Graceful errors shipped: Express API error middleware (notFoundHandler + errorHandler), React ErrorBoundary, Toast presenter, and 404 NotFoundPage.
 - Backend error responses strictly formatted as `{ error: { code, message, details } }`.
 - Route fallback added to App.jsx for unknown paths rendering NotFoundPage, wrapped in ErrorBoundary with Toast notification integration.
@@ -116,3 +111,8 @@ Stretch (19)
 - UI updated in App.jsx (XP display in stats header), MarketPage.jsx, and CookPage.jsx (disabled/locked buttons with 🔒 badges for tier-locked ingredients).
 - Tests & Evidence: unit/API/security tests (68 total) and Playwright E2E test tests/e2e/progression.spec.js green; screenshot and video in docs/evidence/S3.1/.
 - Next up: S3.2 Cosmetics shop (M:N join with equipped), UI theme switch.
+- S3.2 Cosmetics shop & UI theme switch shipped: DB migration 006_cosmetics.sql created cosmetics and kitchen_cosmetics M:N join table.
+- REST endpoints GET /api/cosmetics, POST /api/cosmetics/:id/purchase, POST /api/cosmetics/:id/equip created.
+- CosmeticsPage.jsx and App.jsx updated to support theme switching via CSS class, badge display, and shop customization.
+- Tests & Evidence: Vitest unit/API/security tests (75 total) and Playwright E2E test tests/e2e/cosmetics.spec.js green; screenshot & video saved in docs/evidence/S3.2/.
+- Next up: S3.3 Deploy to Render (render.yaml, env vars, health check, Playwright smoke vs live URL).

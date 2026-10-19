@@ -4,6 +4,7 @@ import { logAudit } from './utils/audit.js';
 import { getOrder, postDish, getDishes, getDish, patchDish, removeDish } from './controllers/dishes.controller.js';
 import { listIngredients } from './controllers/ingredients.controller.js';
 import { handleResetGame, handleNewGame, handleGetGameState, handleNextDay } from './controllers/game.controller.js';
+import { cosmeticsRouter } from './routes/cosmetics.routes.js';
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 
 export function createApp() {
@@ -24,6 +25,9 @@ export function createApp() {
   app.post('/api/dishes', postDish);
   app.patch('/api/dishes/:id', patchDish);
   app.delete('/api/dishes/:id', removeDish);
+
+  // Cosmetics routes
+  app.use('/api/cosmetics', cosmeticsRouter);
 
   // Game control routes
   app.post('/api/game/reset', handleResetGame);
