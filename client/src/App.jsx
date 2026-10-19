@@ -2,10 +2,24 @@ import React, { useEffect, useState } from 'react';
 import { CookPage } from './pages/CookPage.jsx';
 import { MarketPage } from './pages/MarketPage.jsx';
 import { DishPage } from './pages/DishPage.jsx';
+import { NotFoundPage } from './pages/NotFoundPage.jsx';
 import { MarketNewsSlideout } from './components/MarketNewsSlideout.jsx';
 import { OrderDetailModal } from './components/OrderDetailModal.jsx';
+import { ErrorBoundary } from './components/ErrorBoundary.jsx';
+import { Toast } from './components/Toast.jsx';
 
-export function App() {
+/**
+ * Component to throw an error when ?triggerError=true query param is present (for testing ErrorBoundary)
+ */
+function BuggyComponent() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('triggerError') === 'true') {
+    throw new Error('Test error caught by ErrorBoundary');
+  }
+  return null;
+}
+
+export function AppContent() {
   const [pathname, setPathname] = useState(window.location.pathname);
   const [health, setHealth] = useState('checking...');
   const [gameState, setGameState] = useState(null);
@@ -17,18 +31,30 @@ export function App() {
   const [isNewsSlideoutOpen, setIsNewsSlideoutOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
+  // S2.7 Toast state
+  const [toast, setToast] = useState(null);
+
+  const triggerToast = (msg, type = 'info') => {
+    setToast({ message: msg, type });
+  };
+
   const fetchGameState = () => {
     fetch('/api/game/state')
       .then((res) => res.json())
       .then((data) => setGameState(data))
-      .catch(() => {});
+      .catch(() => {
+        triggerToast('Failed to fetch game state', 'error');
+      });
   };
 
   useEffect(() => {
     fetch('/api/health')
       .then((res) => res.json())
       .then((data) => setHealth(data.status))
-      .catch(() => setHealth('error'));
+      .catch(() => {
+        setHealth('error');
+        triggerToast('API server health check failed', 'error');
+      });
 
     fetchGameState();
 
@@ -44,12 +70,15 @@ export function App() {
         const data = await res.json();
         setGameState({ player: data.player, kitchen: data.kitchen, orders: data.orders, activeEvents: data.activeEvents || [] });
         setMessage('Database reset to default seed state!');
+        triggerToast('Kitchen database reset successfully!', 'success');
         setShowConfirmModal(false);
       } else {
         setMessage('Failed to reset database.');
+        triggerToast('Failed to reset database', 'error');
       }
     } catch (err) {
       setMessage('Error resetting database.');
+      triggerToast('Error connecting to server for reset', 'error');
     }
   };
 
@@ -68,31 +97,65 @@ export function App() {
         });
         if (data.gameOver) {
           setMessage(`GAME OVER! ${data.gameOverReason}`);
+          triggerToast(`GAME OVER: ${data.gameOverReason}`, 'error');
         } else {
-          setMessage(`Advanced to Day ${data.kitchen.day}! Rent charged: $${data.rentCharged.toFixed(2)}.`);
+          const msg = `Advanced to Day ${data.kitchen.day}! Rent charged: $${data.rentCharged.toFixed(2)}.`;
+          setMessage(msg);
+          triggerToast(msg, 'success');
           // S2.6 Auto-open market news slideout on Next Day
           setIsNewsSlideoutOpen(true);
         }
       } else {
         setMessage('Error advancing to next day.');
+        triggerToast(data?.error?.message || 'Error advancing to next day', 'error');
       }
     } catch (err) {
       setMessage('Failed to advance day.');
+      triggerToast('Failed to connect to server for next day', 'error');
     } finally {
       setIsNextDayPending(false);
     }
   };
 
+  // Check known routes
   if (pathname === '/market') {
-    return <MarketPage />;
+    return (
+      <>
+        <BuggyComponent />
+        <MarketPage />
+        <Toast toast={toast} onClose={() => setToast(null)} />
+      </>
+    );
   }
 
   if (pathname.includes('/cook')) {
-    return <CookPage />;
+    return (
+      <>
+        <BuggyComponent />
+        <CookPage />
+        <Toast toast={toast} onClose={() => setToast(null)} />
+      </>
+    );
   }
 
   if (pathname.startsWith('/dishes/')) {
-    return <DishPage />;
+    return (
+      <>
+        <BuggyComponent />
+        <DishPage />
+        <Toast toast={toast} onClose={() => setToast(null)} />
+      </>
+    );
+  }
+
+  if (pathname !== '/' && pathname !== '/orders') {
+    return (
+      <>
+        <BuggyComponent />
+        <NotFoundPage />
+        <Toast toast={toast} onClose={() => setToast(null)} />
+      </>
+    );
   }
 
   const kitchen = gameState?.kitchen;
@@ -102,6 +165,7 @@ export function App() {
 
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '800px', margin: '0 auto' }}>
+      <BuggyComponent />
       <h1>Budget Bistro 🍳</h1>
       <p id="health-status">API Status: {health}</p>
 
@@ -400,6 +464,16 @@ export function App() {
           setPathname(`/orders/${orderId}/cook`);
         }}
       />
+
+      <Toast toast={toast} onClose={() => setToast(null)} />
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <ErrorBoundary>
+      <AppContent />
+    </ErrorBoundary>
   );
 }
