@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Spinner } from '../components/Spinner.jsx';
 
 export function CookPage() {
   const [order, setOrder] = useState(null);
@@ -8,6 +9,10 @@ export function CookPage() {
   const [status, setStatus] = useState('loading');
   const [error, setError] = useState(null);
   const [kitchenTier, setKitchenTier] = useState(1);
+
+  const triggerToast = (message, type = 'info') => {
+    window.dispatchEvent(new CustomEvent('app-toast', { detail: { message, type } }));
+  };
 
   const fetchOrderDetails = (orderId) => {
     fetch('/api/game/state')
@@ -32,6 +37,7 @@ export function CookPage() {
       .catch((err) => {
         setError(err.message);
         setStatus('error');
+        triggerToast(err.message || 'Failed to load order', 'error');
       });
   };
 
@@ -55,6 +61,7 @@ export function CookPage() {
   const handleServe = async () => {
     if (!order) return;
     setStatus('pending');
+    triggerToast('Preparing and serving dish...', 'info');
     try {
       const res = await fetch('/api/dishes', {
         method: 'POST',
@@ -68,6 +75,7 @@ export function CookPage() {
       if (!res.ok) throw new Error(data.error?.message || 'Failed to serve dish');
       setResult(data);
       setStatus('done');
+      triggerToast('Dish served successfully!', 'success');
 
       // Redirect to /dishes/:dishId after serve
       if (data.dishId) {
@@ -79,10 +87,18 @@ export function CookPage() {
     } catch (err) {
       setError(err.message);
       setStatus('idle');
+      triggerToast(err.message || 'Error serving dish', 'error');
     }
   };
 
-  if (status === 'loading') return <div style={{ padding: '2rem' }}>Loading order...</div>;
+  if (status === 'loading') {
+    return (
+      <div style={{ padding: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <Spinner size="large" color="#1976d2" /> Loading order details...
+      </div>
+    );
+  }
+
   if (status === 'error' && !order) return <div style={{ padding: '2rem', color: 'red' }}>Error: {error}</div>;
 
   return (
@@ -130,7 +146,7 @@ export function CookPage() {
             <button
               key={ing.id}
               data-testid={`ingredient-${ing.id}`}
-              disabled={isLocked}
+              disabled={isLocked || status === 'pending'}
               onClick={() => toggleIngredient(ing.id, isLocked)}
               style={{
                 padding: '0.75rem 1rem',
@@ -138,7 +154,7 @@ export function CookPage() {
                 backgroundColor: isLocked ? '#e0e0e0' : isSelected ? '#e8f5e9' : '#fff',
                 color: isLocked ? '#777' : '#000',
                 borderRadius: '6px',
-                cursor: isLocked ? 'not-allowed' : 'pointer',
+                cursor: isLocked || status === 'pending' ? 'not-allowed' : 'pointer',
                 fontSize: '1rem',
                 opacity: isLocked ? 0.6 : 1,
               }}
@@ -160,10 +176,19 @@ export function CookPage() {
           border: 'none',
           borderRadius: '6px',
           fontSize: '1rem',
-          cursor: selectedIngredients.length === 0 ? 'not-allowed' : 'pointer',
+          cursor: selectedIngredients.length === 0 || status === 'pending' ? 'not-allowed' : 'pointer',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.5rem',
         }}
       >
-        {status === 'pending' ? 'Serving...' : 'Serve Dish'}
+        {status === 'pending' ? (
+          <>
+            <Spinner size="small" /> Serving...
+          </>
+        ) : (
+          'Serve Dish'
+        )}
       </button>
 
       {error && <p style={{ color: 'red', marginTop: '1rem' }}>{error}</p>}

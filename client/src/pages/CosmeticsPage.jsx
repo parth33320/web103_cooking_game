@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { getCosmetics, purchaseCosmetic, equipCosmetic } from '../api/cosmetics.js';
 import { Toast } from '../components/Toast.jsx';
+import { Spinner } from '../components/Spinner.jsx';
 
 export function CosmeticsPage({ kitchen, onRefreshKitchen }) {
   const [cosmetics, setCosmetics] = useState([]);
   const [activeTab, setActiveTab] = useState('all');
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
+  const [actionPendingId, setActionPendingId] = useState(null);
 
   const fetchCosmeticsList = async () => {
     try {
@@ -25,6 +27,7 @@ export function CosmeticsPage({ kitchen, onRefreshKitchen }) {
   }, []);
 
   const handleBuy = async (item) => {
+    setActionPendingId(item.id);
     try {
       const data = await purchaseCosmetic(item.id);
       setToast({ message: `Successfully purchased ${data.cosmetic.name}!`, type: 'success' });
@@ -32,10 +35,13 @@ export function CosmeticsPage({ kitchen, onRefreshKitchen }) {
       if (onRefreshKitchen) await onRefreshKitchen();
     } catch (err) {
       setToast({ message: err.message || 'Failed to purchase cosmetic', type: 'error' });
+    } finally {
+      setActionPendingId(null);
     }
   };
 
   const handleEquip = async (item) => {
+    setActionPendingId(item.id);
     try {
       await equipCosmetic(item.id);
       setToast({ message: `Equipped ${item.name}!`, type: 'success' });
@@ -43,6 +49,8 @@ export function CosmeticsPage({ kitchen, onRefreshKitchen }) {
       if (onRefreshKitchen) await onRefreshKitchen();
     } catch (err) {
       setToast({ message: err.message || 'Failed to equip cosmetic', type: 'error' });
+    } finally {
+      setActionPendingId(null);
     }
   };
 
@@ -126,7 +134,10 @@ export function CosmeticsPage({ kitchen, onRefreshKitchen }) {
       </div>
 
       {loading ? (
-        <p>Loading shop items...</p>
+        <div style={{ padding: '3rem', textAlign: 'center', color: '#0288d1' }}>
+          <Spinner size="large" color="#0288d1" />
+          <p style={{ marginTop: '1rem', fontWeight: 'bold' }}>Loading shop items...</p>
+        </div>
       ) : (
         <div
           id="cosmetics-grid"
@@ -139,6 +150,7 @@ export function CosmeticsPage({ kitchen, onRefreshKitchen }) {
           {filteredCosmetics.map((item) => {
             const isLockedTier = kitchen && kitchen.tier < item.unlockTier;
             const canAfford = kitchen && kitchen.wallet >= item.price;
+            const isPending = actionPendingId === item.id;
 
             return (
               <div
@@ -200,8 +212,9 @@ export function CosmeticsPage({ kitchen, onRefreshKitchen }) {
                     </button>
                   ) : item.unlocked ? (
                     <button
-                      className="equip-cosmetic-btn"
+                      className="equip-cosmetic-btn cosmetic-buy-btn"
                       id={`equip-cosmetic-${item.id}-btn`}
+                      disabled={isPending}
                       onClick={() => handleEquip(item)}
                       style={{
                         width: '100%',
@@ -210,11 +223,15 @@ export function CosmeticsPage({ kitchen, onRefreshKitchen }) {
                         color: '#fff',
                         border: 'none',
                         borderRadius: '4px',
-                        cursor: 'pointer',
+                        cursor: isPending ? 'not-allowed' : 'pointer',
                         fontWeight: 'bold',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
                       }}
                     >
-                      Equip Item
+                      {isPending ? <Spinner size="small" /> : 'Equip Item'}
                     </button>
                   ) : isLockedTier ? (
                     <button
@@ -233,10 +250,10 @@ export function CosmeticsPage({ kitchen, onRefreshKitchen }) {
                     </button>
                   ) : (
                     <button
-                      className="buy-cosmetic-btn"
+                      className="buy-cosmetic-btn cosmetic-buy-btn"
                       id={`buy-cosmetic-${item.id}-btn`}
                       onClick={() => handleBuy(item)}
-                      disabled={!canAfford}
+                      disabled={!canAfford || isPending}
                       style={{
                         width: '100%',
                         padding: '0.5rem',
@@ -244,11 +261,21 @@ export function CosmeticsPage({ kitchen, onRefreshKitchen }) {
                         color: '#fff',
                         border: 'none',
                         borderRadius: '4px',
-                        cursor: canAfford ? 'pointer' : 'not-allowed',
+                        cursor: canAfford && !isPending ? 'pointer' : 'not-allowed',
                         fontWeight: 'bold',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
                       }}
                     >
-                      {canAfford ? 'Buy Cosmetic' : 'Insufficient Funds'}
+                      {isPending ? (
+                        <Spinner size="small" />
+                      ) : canAfford ? (
+                        'Buy Cosmetic'
+                      ) : (
+                        'Insufficient Funds'
+                      )}
                     </button>
                   )}
                 </div>

@@ -33,7 +33,7 @@
 - [x] S3.1 XP, Tier, Tier-gated Constraint Types (allergen, availability)
 - [x] S3.2 Cosmetics shop (M:N join with `equipped`), UI theme switch
 - [x] S3.3 Deploy to Render (render.yaml, env vars, health check, Playwright smoke vs live URL)
-- [ ] S3.4 Stretch: spinner, disabled buttons, toasts on all async actions
+- [x] S3.4 Stretch: spinner, disabled buttons, toasts on all async actions
 - [x] S3.5 Endgame v1: Suppliers + Trust (M:N), VIP multi-constraint orders
 - [x] S3.6 Final: README feature checklist, per-feature GIFs, full run-through GIF, milestone5.md
 
@@ -85,11 +85,11 @@ Stretch (19)
 |---|---|---|---|---|
 | Login + protected routes | 3 | S4.1 | | todo |
 | Restrict options dynamically (can't buy what you can't afford / locked tier) | 3 | S3.1/S3.2 | tests/security/cosmetics.security.test.js | done |
-| Spinner while loading | 2 | S3.4 | | todo |
-| Disable buttons/inputs during submit | 2 | S3.4 | | todo |
-| Disable buttons after click (75%+ of buttons) | 2 | S3.4 | | todo |
+| Spinner while loading | 2 | S3.4 | tests/unit/s3_4_stretch_polish.test.js | done |
+| Disable buttons/inputs during submit | 2 | S3.4 | tests/unit/s3_4_stretch_polish.test.js | done |
+| Disable buttons after click (75%+ of buttons) | 2 | S3.4 | tests/e2e/stretch_polish.spec.js | done |
 | Image upload to cloud storage | 4 | not planned (needs real upload, not URL/preset) | | skip |
-| Toast messages | 3 | S2.7/S3.4 | | todo |
+| Toast messages | 3 | S2.7/S3.4 | tests/e2e/stretch_polish.spec.js | done |
 
 ## Milestone deliverables (human-owned; Jules may draft, team must finalize)
 
@@ -105,9 +105,13 @@ Stretch (19)
 - Express server now serves client/dist built SPA files when present and handles SPA route fallbacks to index.html.
 - Live deployment smoke test suite created in tests/e2e/live.spec.js verifying /api/health endpoint and frontend rendering.
 - Tests & Evidence: all unit, integration, security, and Playwright E2E tests green; screenshot and video evidence in docs/evidence/S3.3/.
-- Next up: S3.4 Stretch: spinner, disabled buttons, toasts on all async actions.
 - S3.6 Final Deliverables shipped: created README.md with live Render link, app overview, inspiration, team members, and complete feature checklist with evidence links.
 - Created milestone5.md final report documenting completed rubric requirements, custom features, and team reflection.
 - Created unit test tests/unit/final_deliverables.test.js, security test tests/security/final.security.test.js, and E2E test tests/e2e/final.spec.js.
 - Recorded full E2E run-through evidence (screenshot.png and video.webm) saved in docs/evidence/S3.6/.
 - All quality checks (standards-check, rubric-check, vitest, and playwright) passed cleanly.
+- S3.4 Stretch Polish shipped: Reusable Spinner component, global custom event toast dispatcher, and async button disabled/loading states across all pages.
+- Buttons across Dashboard (Next Day, Reset), CookPage (Serve), CosmeticsPage (Buy, Equip), and MarketPage (Filters) disable during async pending operations and show loading spinners.
+- Created unit tests (tests/unit/s3_4_stretch_polish.test.js), security tests (tests/security/s3_4.security.test.js), and Playwright E2E tests (tests/e2e/stretch_polish.spec.js).
+- Tests & Evidence: 91 Vitest unit/security tests and 21 Playwright E2E tests pass 100%; screenshot and video evidence in docs/evidence/S3.4/.
+- Quality & Verification: npm run standards-check and npm run rubric-check passed cleanly.

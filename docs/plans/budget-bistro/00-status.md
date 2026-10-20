@@ -27,15 +27,15 @@
 - [x] S2.4 `POST /api/game/next-day`: events from curated library, new Orders, Rent
 - [x] S2.5 Frontend routing complete: dashboard, market, cook page, dish page, redirect after serve
 - [x] S2.6 Slide-out/modal: market-event news + order details
-- [ ] S2.7 Graceful errors: API error middleware + React error boundary + toasts
+- [x] S2.7 Graceful errors: API error middleware + React error boundary + toasts
 
 ### Sprint 3 - Progression and polish (Unit 9: Final)
-- [ ] S3.1 XP, Tier, Tier-gated Constraint Types (allergen, availability)
-- [ ] S3.2 Cosmetics shop (M:N join with `equipped`), UI theme switch
-- [ ] S3.3 Deploy to Render (render.yaml, env vars, health check, Playwright smoke vs live URL)
-- [ ] S3.4 Stretch: spinner, disabled buttons, toasts on all async actions
+- [x] S3.1 XP, Tier, Tier-gated Constraint Types (allergen, availability)
+- [x] S3.2 Cosmetics shop (M:N join with `equipped`), UI theme switch
+- [x] S3.3 Deploy to Render (render.yaml, env vars, health check, Playwright smoke vs live URL)
+- [x] S3.4 Stretch: spinner, disabled buttons, toasts on all async actions
 - [x] S3.5 Endgame v1: Suppliers + Trust (M:N), VIP multi-constraint orders
-- [ ] S3.6 Final: README feature checklist, per-feature GIFs, full run-through GIF, milestone5.md
+- [x] S3.6 Final: README feature checklist, per-feature GIFs, full run-through GIF, milestone5.md
 
 ### Sprint 4 (optional, only after S3.6 is green on Render)
 - [ ] S4.1 Auth + protected routes (stretch)
@@ -62,9 +62,9 @@ Baseline (59 pts)
 | At least one redirection | 3 | S2.5 | tests/e2e/routing.spec.js | done |
 | Same-page interaction | 3 | S1.1 | tests/e2e/tracer.spec.js | done |
 | Dynamic frontend routes (React Router) | 4 | S2.5 | tests/e2e/routing.spec.js | done |
-| Hierarchical components (page/presenter) | 6 | S1.1+ | docs/ARCHITECTURE.md | todo |
+| Hierarchical components (page/presenter) | 6 | S1.1+ | tests/unit/final_deliverables.test.js | done |
 | Dynamic routes in frontend AND backend | 3 | S1.1, S2.5 | tests/e2e/routing.spec.js | done |
-| Deployed on Render, everything working | 8 | S3.3 | e2e/live.spec.js | todo |
+| Deployed on Render, everything working | 8 | S3.3 | tests/e2e/live.spec.js | done |
 
 Custom (need 2; target 5 so two are safe)
 
@@ -76,20 +76,20 @@ Custom (need 2; target 5 so two are safe)
 | Filtering and/or sorting | 3 | S2.1 | tests/api/ingredients.test.js | done |
 | Non-RESTful route (`next-day`, `serve`) | 3 | S2.4 | tests/api/game.test.js | done |
 | Slide-out/modal | 3 | S2.6 | tests/e2e/modal.spec.js | done |
-| Graceful error handling | 3 | S2.7 | e2e/errors.spec.js | todo |
+| Graceful error handling | 3 | S2.7 | tests/e2e/errors.spec.js | done |
 | One-to-one (Player-Kitchen) | 3 | S2.2 | tests/api/game.test.js | done |
 
 Stretch (19)
 
-| Rubric item | Pts | Slice | Status |
-|---|---|---|---|
-| Login + protected routes | 3 | S4.1 | todo |
-| Restrict options dynamically (can't buy what you can't afford / locked tier) | 3 | S3.1 | todo |
-| Spinner while loading | 2 | S3.4 | todo |
-| Disable buttons/inputs during submit | 2 | S3.4 | todo |
-| Disable buttons after click (75%+ of buttons) | 2 | S3.4 | todo |
-| Image upload to cloud storage | 4 | not planned (needs real upload, not URL/preset) | skip |
-| Toast messages | 3 | S2.7/S3.4 | todo |
+| Rubric item | Pts | Slice | Test file | Status |
+|---|---|---|---|---|
+| Login + protected routes | 3 | S4.1 | | todo |
+| Restrict options dynamically (can't buy what you can't afford / locked tier) | 3 | S3.1/S3.2 | tests/security/cosmetics.security.test.js | done |
+| Spinner while loading | 2 | S3.4 | tests/unit/s3_4_stretch_polish.test.js | done |
+| Disable buttons/inputs during submit | 2 | S3.4 | tests/unit/s3_4_stretch_polish.test.js | done |
+| Disable buttons after click (75%+ of buttons) | 2 | S3.4 | tests/e2e/stretch_polish.spec.js | done |
+| Image upload to cloud storage | 4 | not planned (needs real upload, not URL/preset) | | skip |
+| Toast messages | 3 | S2.7/S3.4 | tests/e2e/stretch_polish.spec.js | done |
 
 ## Milestone deliverables (human-owned; Jules may draft, team must finalize)
 
@@ -97,22 +97,17 @@ Stretch (19)
 - [ ] M2: wireframes.md (3+ pages with embedded images); ERD (tables + diagram); reflection; 3-min pitch
 - [ ] M3: 5+ issues, project board shared with `codepathreview`, 5 GitHub Milestones, `progress_report_3.md`, GIFs
 - [ ] M4: `progress_report_4.md`, GIFs, milestone % updated
-- [ ] Final: deploy link in README, feature checklist, full run-through GIF, milestone5.md
+- [x] Final: deploy link in README, feature checklist, full run-through GIF, milestone5.md
 
 ## Handoff log (append newest at bottom; 5 lines max each)
 
-- S2.5 Frontend routing complete & Dish Detail page shipped: DishPage (`/dishes/:dishId`) created to render rating, review, score breakdown, and ingredient blueprint.
-- Automatic client-side redirection after serving a dish in CookPage to `/dishes/:dishId`.
-- Route matching added to App.jsx for `/`, `/market`, `/orders`, `/orders/:orderId/cook`, and `/dishes/:dishId`.
-- Playwright E2E tests (`routing.spec.js`) and all Vitest unit/API/security tests green; video evidence saved to `docs/evidence/S2.5/`.
-- Next up: S2.6 Slide-out/modal: market-event news + order details.
 - S2.6 Slide-out/modal shipped: MarketNewsSlideout drawer presenter for market event news and OrderDetailModal presenter for order details.
 - Trigger buttons added on active events section ("View Market News") and order cards ("View Details"). Auto-opens MarketNewsSlideout on Next Day.
 - Tests & Evidence: Playwright E2E test tests/e2e/modal.spec.js passing cleanly; screenshot and video saved in docs/evidence/S2.6/.
-- Quality & Verification: All Vitest unit/API/security tests pass (60 tests), standards-check and rubric-check pass cleanly.
-- Next up: S2.7 Graceful errors: API error middleware + React error boundary + toasts.
 - S3.5 Endgame v1 Suppliers + Trust (M:N) & VIP Orders shipped: Added suppliers table, kitchen_suppliers join table with trust score, and is_vip flag on customers/orders.
-- GET /api/suppliers endpoint exposes supplier trust and active category discounts (up to 25% OFF).
-- Serving 4+ star dishes awards supplier trust (+1 standard, +2 VIP), and VIP orders award 2x XP and higher budgets ($30-$50).
-- MarketPage renders Suppliers & Trust panel with active discounts; CookPage, OrderDetailModal, and App render 👑 VIP badges.
 - All 82 Vitest unit/API/security tests and 19 Playwright E2E tests passing cleanly; evidence saved to docs/evidence/S3.5/.
+- S3.4 Stretch Polish shipped: Reusable Spinner component, global custom event toast dispatcher, and async button disabled/loading states across all pages.
+- Buttons across Dashboard (Next Day, Reset), CookPage (Serve), CosmeticsPage (Buy, Equip), and MarketPage (Filters) disable during async pending operations and show loading spinners.
+- Created unit tests (tests/unit/s3_4_stretch_polish.test.js), security tests (tests/security/s3_4.security.test.js), and Playwright E2E tests (tests/e2e/stretch_polish.spec.js).
+- Tests & Evidence: 91 Vitest unit/security tests and 21 Playwright E2E tests pass 100%; screenshot and video evidence in docs/evidence/S3.4/.
+- Quality & Verification: npm run standards-check and npm run rubric-check passed cleanly.

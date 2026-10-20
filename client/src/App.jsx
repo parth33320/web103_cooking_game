@@ -8,6 +8,7 @@ import { MarketNewsSlideout } from './components/MarketNewsSlideout.jsx';
 import { OrderDetailModal } from './components/OrderDetailModal.jsx';
 import { ErrorBoundary } from './components/ErrorBoundary.jsx';
 import { Toast } from './components/Toast.jsx';
+import { Spinner } from './components/Spinner.jsx';
 import { getCosmetics } from './api/cosmetics.js';
 
 /**
@@ -28,6 +29,7 @@ export function AppContent() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [message, setMessage] = useState('');
   const [isNextDayPending, setIsNextDayPending] = useState(false);
+  const [isResetPending, setIsResetPending] = useState(false);
 
   // S3.2 Cosmetics State
   const [equippedTheme, setEquippedTheme] = useState('theme-default');
@@ -37,12 +39,23 @@ export function AppContent() {
   const [isNewsSlideoutOpen, setIsNewsSlideoutOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
-  // S2.7 Toast state
+  // S2.7 & S3.4 Toast state
   const [toast, setToast] = useState(null);
 
   const triggerToast = (msg, type = 'info') => {
     setToast({ message: msg, type });
   };
+
+  // Listen for global custom window events to trigger toast messages
+  useEffect(() => {
+    const handleGlobalToast = (e) => {
+      if (e && e.detail) {
+        setToast(e.detail);
+      }
+    };
+    window.addEventListener('app-toast', handleGlobalToast);
+    return () => window.removeEventListener('app-toast', handleGlobalToast);
+  }, []);
 
   const fetchCosmeticsTheme = async () => {
     try {
@@ -92,6 +105,7 @@ export function AppContent() {
   }, [equippedTheme]);
 
   const handleReset = async () => {
+    setIsResetPending(true);
     try {
       const res = await fetch('/api/game/reset', { method: 'POST' });
       if (res.ok) {
@@ -108,6 +122,8 @@ export function AppContent() {
     } catch (err) {
       setMessage('Error resetting database.');
       triggerToast('Error connecting to server for reset', 'error');
+    } finally {
+      setIsResetPending(false);
     }
   };
 
@@ -403,10 +419,19 @@ export function AppContent() {
             color: '#fff',
             border: 'none',
             borderRadius: '6px',
-            cursor: 'pointer',
+            cursor: isNextDayPending ? 'not-allowed' : 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
           }}
         >
-          {isNextDayPending ? 'Advancing...' : 'Next Day 🌙'}
+          {isNextDayPending ? (
+            <>
+              <Spinner size="small" /> Advancing...
+            </>
+          ) : (
+            'Next Day 🌙'
+          )}
         </button>
         <a
           href="/market"
@@ -495,6 +520,7 @@ export function AppContent() {
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
               <button
                 id="cancel-reset-btn"
+                disabled={isResetPending}
                 onClick={() => setShowConfirmModal(false)}
                 style={{
                   padding: '0.5rem 1rem',
@@ -502,13 +528,14 @@ export function AppContent() {
                   color: '#fff',
                   border: 'none',
                   borderRadius: '4px',
-                  cursor: 'pointer',
+                  cursor: isResetPending ? 'not-allowed' : 'pointer',
                 }}
               >
                 Cancel
               </button>
               <button
                 id="confirm-reset-btn"
+                disabled={isResetPending}
                 onClick={handleReset}
                 style={{
                   padding: '0.5rem 1rem',
@@ -516,10 +543,19 @@ export function AppContent() {
                   color: '#fff',
                   border: 'none',
                   borderRadius: '4px',
-                  cursor: 'pointer',
+                  cursor: isResetPending ? 'not-allowed' : 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
                 }}
               >
-                Confirm Reset
+                {isResetPending ? (
+                  <>
+                    <Spinner size="small" /> Resetting...
+                  </>
+                ) : (
+                  'Confirm Reset'
+                )}
               </button>
             </div>
           </div>
