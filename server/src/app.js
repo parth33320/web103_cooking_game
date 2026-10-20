@@ -7,6 +7,7 @@ import { getOrder, postDish, getDishes, getDish, patchDish, removeDish } from '.
 import { listIngredients } from './controllers/ingredients.controller.js';
 import { handleResetGame, handleNewGame, handleGetGameState, handleNextDay } from './controllers/game.controller.js';
 import { cosmeticsRouter } from './routes/cosmetics.routes.js';
+import { suppliersRouter } from './routes/suppliers.routes.js';
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 
 export function createApp() {
@@ -30,6 +31,9 @@ export function createApp() {
 
   // Cosmetics routes
   app.use('/api/cosmetics', cosmeticsRouter);
+
+  // Suppliers routes
+  app.use('/api/suppliers', suppliersRouter);
 
   // Game control routes
   app.post('/api/game/reset', handleResetGame);

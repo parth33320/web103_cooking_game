@@ -39,8 +39,24 @@ export function OrderDetailModal({ isOpen, order, onClose, onCook }) {
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e0e0e0', paddingBottom: '0.75rem' }}>
-          <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#1b5e20' }}>
+          <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#1b5e20', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             📋 Order #{order.id} Details
+            {order.isVip && (
+              <span
+                data-testid="vip-badge"
+                style={{
+                  backgroundColor: '#ffd700',
+                  color: '#000',
+                  fontSize: '0.75rem',
+                  fontWeight: 'bold',
+                  padding: '0.2rem 0.5rem',
+                  borderRadius: '12px',
+                  border: '1px solid #cca300',
+                }}
+              >
+                👑 VIP Order
+              </span>
+            )}
           </h2>
           <button
             id="close-order-modal"

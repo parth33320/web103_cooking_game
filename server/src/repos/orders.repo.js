@@ -1,4 +1,5 @@
 import { pool } from '../db/index.js';
+import { getSupplierDiscounts, calculateEffectiveIngredientPrice } from './suppliers.repo.js';
 
 /**
  * Orders Repository
@@ -9,7 +10,7 @@ import { pool } from '../db/index.js';
 export async function getOrderById(orderId) {
   const result = await pool.query(
     `SELECT o.id, o.kitchen_id, o.customer_id, o.budget, o.target_protein_g, o.target_carbs_g, o.target_fat_g,
-            o.tolerance_pct, o.status,
+            o.tolerance_pct, o.status, COALESCE(o.is_vip, false) as is_vip,
             c.name as customer_name, c.job, c.diet,
             COALESCE(o.favorite_ingredient_id, c.favorite_ingredient_id) as favorite_ingredient_id,
             COALESCE(o.blacklisted_ingredient_id, c.blacklisted_ingredient_id) as blacklisted_ingredient_id,
@@ -67,6 +68,7 @@ export async function getOrderById(orderId) {
     blacklistedIngredientName: row.blacklisted_ingredient_name || null,
     blacklistedIngredientIds: blackId ? [blackId] : [],
     status: row.status,
+    isVip: Boolean(row.is_vip),
     reviews,
   };
 }
@@ -86,9 +88,9 @@ export async function createCustomerAndOrder({ kitchenId = 1, customer, order })
     const nextCustId = custIdRes.rows[0].next_id;
 
     const customerRes = await client.query(
-      `INSERT INTO customers (id, name, job, diet, favorite_ingredient_id, blacklisted_ingredient_id)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING id, name, job, diet, favorite_ingredient_id, blacklisted_ingredient_id`,
+      `INSERT INTO customers (id, name, job, diet, favorite_ingredient_id, blacklisted_ingredient_id, is_vip)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING id, name, job, diet, favorite_ingredient_id, blacklisted_ingredient_id, is_vip`,
       [
         nextCustId,
         customer.name,
@@ -96,6 +98,7 @@ export async function createCustomerAndOrder({ kitchenId = 1, customer, order })
         customer.diet || 'Omnivore',
         customer.favoriteIngredientId || null,
         customer.blacklistedIngredientId || null,
+        Boolean(customer.isVip),
       ]
     );
     const createdCustomer = customerRes.rows[0];
@@ -104,9 +107,9 @@ export async function createCustomerAndOrder({ kitchenId = 1, customer, order })
     const nextOrderId = orderIdRes.rows[0].next_id;
 
     const orderRes = await client.query(
-      `INSERT INTO orders (id, kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, tolerance_pct, favorite_ingredient_id, blacklisted_ingredient_id, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-       RETURNING id, kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, tolerance_pct, status`,
+      `INSERT INTO orders (id, kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, tolerance_pct, favorite_ingredient_id, blacklisted_ingredient_id, status, is_vip)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+       RETURNING id, kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, tolerance_pct, status, is_vip`,
       [
         nextOrderId,
         kitchenId,
@@ -119,6 +122,7 @@ export async function createCustomerAndOrder({ kitchenId = 1, customer, order })
         order.favoriteIngredientId || createdCustomer.favorite_ingredient_id || null,
         order.blacklistedIngredientId || createdCustomer.blacklisted_ingredient_id || null,
         order.status || 'open',
+        Boolean(order.isVip),
       ]
     );
     const createdOrder = orderRes.rows[0];
@@ -140,7 +144,7 @@ export async function createCustomerAndOrder({ kitchenId = 1, customer, order })
  * Inputs: options object { category?, sort?, order? }
  * Outputs: array of ingredient objects with minTier field
  */
-export async function getIngredients({ category, sort, order } = {}) {
+export async function getIngredients({ category, sort, order, kitchenId = 1 } = {}) {
   const queryParams = [];
   const whereClauses = [];
 
@@ -169,17 +173,51 @@ export async function getIngredients({ category, sort, order } = {}) {
   `;
 
   const result = await pool.query(sql, queryParams);
-  return result.rows.map((row) => ({
-    id: row.id,
-    name: row.name,
-    category: row.category,
-    basePricePer100g: parseFloat(row.base_price_per_100g),
-    proteinGPer100g: row.protein_g_per_100g,
-    carbsGPer100g: row.carbs_g_per_100g,
-    fatGPer100g: row.fat_g_per_100g,
-    emoji: row.emoji,
-    minTier: parseInt(row.min_tier || 1, 10),
-  }));
+
+  // Retrieve active supplier discounts
+  let supplierDiscounts = {};
+  try {
+    supplierDiscounts = await getSupplierDiscounts(kitchenId);
+  } catch (_) {
+    // If supplier tables do not exist yet, fallback to 0 discounts
+  }
+
+  // Retrieve active market event multipliers
+  const categoryMultipliers = {};
+  try {
+    const activeEventsCheck = await pool.query(`
+      SELECT 1 FROM information_schema.tables WHERE table_name = 'active_events'
+    `);
+    if (activeEventsCheck.rows.length > 0) {
+      const activeRes = await pool.query(
+        'SELECT category, multiplier FROM active_events WHERE kitchen_id = $1',
+        [kitchenId]
+      );
+      for (const row of activeRes.rows) {
+        categoryMultipliers[row.category] = parseFloat(row.multiplier);
+      }
+    }
+  } catch (_) {}
+
+  return result.rows.map((row) => {
+    const basePrice = parseFloat(row.base_price_per_100g);
+    const eventMultiplier = categoryMultipliers[row.category] || 1;
+    const trustDiscount = supplierDiscounts[row.category] || 0;
+    const effectivePricePer100g = calculateEffectiveIngredientPrice(basePrice, eventMultiplier, trustDiscount);
+
+    return {
+      id: row.id,
+      name: row.name,
+      category: row.category,
+      basePricePer100g: basePrice,
+      effectivePricePer100g,
+      proteinGPer100g: row.protein_g_per_100g,
+      carbsGPer100g: row.carbs_g_per_100g,
+      fatGPer100g: row.fat_g_per_100g,
+      emoji: row.emoji,
+      minTier: parseInt(row.min_tier || 1, 10),
+    };
+  });
 }
 
 /**

@@ -52,14 +52,17 @@ function getToleranceForTier(tier) {
   return 5;
 }
 
-export function generateCustomerAndOrder({ kitchenTier = 1, seed = 1001, ingredients = [] } = {}) {
+export function generateCustomerAndOrder({ kitchenTier = 1, seed = 1001, ingredients = [], forceVip = false, allowVip = false } = {}) {
   const rng = mulberry32(seed);
+
+  // VIP determination: forced or 25% chance when kitchenTier >= 2 and allowVip is true
+  const isVip = forceVip || (allowVip && kitchenTier >= 2 && rng() < 0.25);
 
   // Pick customer attributes
   const firstName = FIRST_NAMES[Math.floor(rng() * FIRST_NAMES.length)];
-  const job = JOBS[Math.floor(rng() * JOBS.length)];
+  const job = isVip ? 'VIP Food Critic' : JOBS[Math.floor(rng() * JOBS.length)];
   const diet = DIETS[Math.floor(rng() * DIETS.length)];
-  const fullName = `${firstName} the ${job.split(' ')[0]}`;
+  const fullName = isVip ? `VIP ${firstName} the Critic` : `${firstName} the ${job.split(' ')[0]}`;
 
   // Ingredient preference assignment
   let favoriteIngredientId = null;
@@ -69,8 +72,8 @@ export function generateCustomerAndOrder({ kitchenTier = 1, seed = 1001, ingredi
     const favIdx = Math.floor(rng() * ingredients.length);
     favoriteIngredientId = ingredients[favIdx].id;
 
-    // Allergen / blacklisted ingredient constraint is Tier-gated (unlocked at Tier 3+)
-    if (kitchenTier >= 3 && rng() < 0.4 && ingredients.length > 1) {
+    // Allergen / blacklisted ingredient constraint is Tier-gated (unlocked at Tier 3+ or VIP)
+    if ((isVip || (kitchenTier >= 3 && rng() < 0.4)) && ingredients.length > 1) {
       let blackIdx = Math.floor(rng() * ingredients.length);
       while (blackIdx === favIdx) {
         blackIdx = Math.floor(rng() * ingredients.length);
@@ -79,9 +82,11 @@ export function generateCustomerAndOrder({ kitchenTier = 1, seed = 1001, ingredi
     }
   }
 
-  // Calculate order targets based on tier & RNG
-  const tolerancePct = getToleranceForTier(kitchenTier);
-  const baseBudget = 10 + kitchenTier * 4 + Math.floor(rng() * 10);
+  // Calculate order targets based on tier, VIP status & RNG
+  const tolerancePct = isVip ? 5 : getToleranceForTier(kitchenTier);
+  const baseBudget = isVip
+    ? 30 + Math.floor(rng() * 20)
+    : 10 + kitchenTier * 4 + Math.floor(rng() * 10);
   const budget = parseFloat(baseBudget.toFixed(2));
 
   // Targets based on diet profile
@@ -103,6 +108,7 @@ export function generateCustomerAndOrder({ kitchenTier = 1, seed = 1001, ingredi
       diet,
       favoriteIngredientId,
       blacklistedIngredientId,
+      isVip,
     },
     order: {
       budget,
@@ -113,6 +119,7 @@ export function generateCustomerAndOrder({ kitchenTier = 1, seed = 1001, ingredi
       favoriteIngredientId,
       blacklistedIngredientId,
       status: 'open',
+      isVip,
     },
   };
 }

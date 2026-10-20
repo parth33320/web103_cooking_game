@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 
+import { getSuppliers } from '../api/suppliers.js';
+
 export function MarketPage() {
   const [ingredients, setIngredients] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
   const [category, setCategory] = useState('all');
   const [sort, setSort] = useState('price');
   const [order, setOrder] = useState('asc');
@@ -15,6 +18,14 @@ export function MarketPage() {
       .then((data) => {
         if (data && data.kitchen) {
           setKitchenTier(data.kitchen.tier || 1);
+        }
+      })
+      .catch(() => {});
+
+    getSuppliers()
+      .then((data) => {
+        if (data && data.suppliers) {
+          setSuppliers(data.suppliers);
         }
       })
       .catch(() => {});
@@ -61,6 +72,49 @@ export function MarketPage() {
           ← Back to Kitchen
         </a>
       </header>
+
+      {/* Suppliers & Trust Panel */}
+      <section
+        data-testid="suppliers-panel"
+        style={{
+          backgroundColor: '#eef6fc',
+          border: '1px solid #b6d4fe',
+          borderRadius: '8px',
+          padding: '1.25rem',
+          marginBottom: '2rem',
+        }}
+      >
+        <h2 style={{ margin: '0 0 0.5rem 0', color: '#0c5460', fontSize: '1.25rem' }}>🤝 Suppliers & Trust</h2>
+        <p style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', color: '#31708f' }}>
+          Serve 4+ star dishes matching a supplier's ingredient category to build trust and unlock up to 25% discounts on market prices!
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+          {suppliers.map((s) => (
+            <div
+              key={s.id}
+              data-testid={`supplier-card-${s.id}`}
+              style={{
+                backgroundColor: '#fff',
+                border: '1px solid #d0e2f0',
+                borderRadius: '6px',
+                padding: '0.85rem',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+              }}
+            >
+              <h4 style={{ margin: '0 0 0.25rem 0', color: '#1976d2' }}>{s.name}</h4>
+              <p style={{ margin: '0.2rem 0', fontSize: '0.8rem', textTransform: 'capitalize', color: '#666' }}>
+                Category: <strong>{s.category}</strong>
+              </p>
+              <div style={{ margin: '0.4rem 0', fontSize: '0.85rem' }}>
+                ⭐ Trust: <strong>{s.trust}</strong> Level
+              </div>
+              <div style={{ fontSize: '0.85rem', color: s.discountPct > 0 ? '#2e7d32' : '#888', fontWeight: 'bold' }}>
+                🏷️ Discount: {s.discountPct}% OFF
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* Filter and Sort Controls */}
       <div
@@ -206,7 +260,7 @@ export function MarketPage() {
 
                 <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: '0.75rem', marginTop: '0.5rem' }}>
                   <p style={{ margin: '0.25rem 0', fontWeight: 'bold', color: isLocked ? '#777' : '#2e7d32' }}>
-                    Market Price: ${ing.basePricePer100g.toFixed(2)} / 100g
+                    Market Price: ${(ing.effectivePricePer100g || ing.basePricePer100g).toFixed(2)} / 100g
                   </p>
                   <p style={{ margin: '0.25rem 0', fontSize: '0.85rem', color: '#888' }}>
                     Base Price: ${ing.basePricePer100g.toFixed(2)}
