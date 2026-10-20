@@ -1,6 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 test('S2.1 Market Page - Filter by category and sort by price/protein', async ({ page }) => {
+  // Reset game state to default
+  await page.request.post('/api/game/reset');
+
   // Navigate to market page directly
   await page.goto('/market');
 

@@ -74,18 +74,20 @@ export async function resetDatabase() {
       }
     }
 
-    // 1. Seed Default Player (without explicit ID so SERIAL sequence advances)
+    // 1. Seed Default Player (explicit ID=1 for deterministic 1:1 relationship)
     const playerRes = await client.query(
-      `INSERT INTO players (name)
-       VALUES ('Head Chef')
+      `INSERT INTO players (id, name)
+       VALUES (1, 'Head Chef')
+       ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name
        RETURNING id, name, created_at`
     );
     const playerRow = playerRes.rows[0];
 
-    // 2. Seed Default Kitchen (without explicit ID so SERIAL sequence advances)
+    // 2. Seed Default Kitchen (explicit ID=1 for deterministic 1:1 player relationship)
     const kitchenRes = await client.query(
-      `INSERT INTO kitchens (player_id, name, wallet, reputation, day, tier, xp)
-       VALUES ($1, 'Bistro Starter', 100.00, 50, 1, 1, 0)
+      `INSERT INTO kitchens (id, player_id, name, wallet, reputation, day, tier, xp)
+       VALUES (1, $1, 'Bistro Starter', 100.00, 50, 1, 1, 0)
+       ON CONFLICT (id) DO UPDATE SET player_id = EXCLUDED.player_id, wallet = 100.00, reputation = 50, day = 1, tier = 1, xp = 0
        RETURNING id, player_id, name, wallet, reputation, day, tier, xp`,
       [playerRow.id]
     );
