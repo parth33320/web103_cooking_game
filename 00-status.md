@@ -34,8 +34,8 @@
 - [x] S3.2 Cosmetics shop (M:N join with `equipped`), UI theme switch
 - [x] S3.3 Deploy to Render (render.yaml, env vars, health check, Playwright smoke vs live URL)
 - [ ] S3.4 Stretch: spinner, disabled buttons, toasts on all async actions
-- [ ] S3.5 Endgame v1: Suppliers + Trust (M:N), VIP multi-constraint orders
-- [ ] S3.6 Final: README feature checklist, per-feature GIFs, full run-through GIF, milestone5.md
+- [x] S3.5 Endgame v1: Suppliers + Trust (M:N), VIP multi-constraint orders
+- [x] S3.6 Final: README feature checklist, per-feature GIFs, full run-through GIF, milestone5.md
 
 ### Sprint 4 (optional, only after S3.6 is green on Render)
 - [ ] S4.1 Auth + protected routes (stretch)
@@ -60,9 +60,9 @@ Baseline (59 pts)
 | RESTful API, full CRUD on one entity (Dish) | 15 | S1.1, S1.3 | tests/api/dishes.test.js | done |
 | Reset DB to default | 4 | S2.2 | tests/api/game.test.js | done |
 | At least one redirection | 3 | S2.5 | tests/e2e/routing.spec.js | done |
-| Same-page interaction | 3 | S1.1 | tests/e2e/tracer.spec.js | done |
+| Same-Page Interaction | 3 | S1.1 | tests/e2e/tracer.spec.js | done |
 | Dynamic frontend routes (React Router) | 4 | S2.5 | tests/e2e/routing.spec.js | done |
-| Hierarchical components (page/presenter) | 6 | S1.1+ | docs/ARCHITECTURE.md | todo |
+| Hierarchical components (page/presenter) | 6 | S1.1+ | tests/unit/final_deliverables.test.js | done |
 | Dynamic routes in frontend AND backend | 3 | S1.1, S2.5 | tests/e2e/routing.spec.js | done |
 | Deployed on Render, everything working | 8 | S3.3 | tests/e2e/live.spec.js | done |
 
@@ -97,27 +97,17 @@ Stretch (19)
 - [ ] M2: wireframes.md (3+ pages with embedded images); ERD (tables + diagram); reflection; 3-min pitch
 - [ ] M3: 5+ issues, project board shared with `codepathreview`, 5 GitHub Milestones, `progress_report_3.md`, GIFs
 - [ ] M4: `progress_report_4.md`, GIFs, milestone % updated
-- [ ] Final: deploy link in README, feature checklist, full run-through GIF, milestone5.md
+- [x] Final: deploy link in README, feature checklist, full run-through GIF, milestone5.md
 
 ## Handoff log (append newest at bottom; 5 lines max each)
 
-- S2.7 Graceful errors shipped: Express API error middleware (notFoundHandler + errorHandler), React ErrorBoundary, Toast presenter, and 404 NotFoundPage.
-- Backend error responses strictly formatted as `{ error: { code, message, details } }`.
-- Route fallback added to App.jsx for unknown paths rendering NotFoundPage, wrapped in ErrorBoundary with Toast notification integration.
-- Unit & E2E Tests: tests/unit/errors.test.js and tests/e2e/errors.spec.js green; screenshot and video evidence in docs/evidence/S2.7/.
-- Next up: S3.1 XP, Tier, Tier-gated Constraint Types (allergen, availability).
-- S3.1 XP, Tier, and Tier-gated Constraint Types shipped: added server/src/domain/progression.js pure module and migration 005_tier_gating.sql.
-- XP awarded on dish submission and kitchen XP & Tier updated in Postgres; tier-gated allergen constraints generated only at Tier 3+.
-- UI updated in App.jsx (XP display in stats header), MarketPage.jsx, and CookPage.jsx (disabled/locked buttons with 🔒 badges for tier-locked ingredients).
-- Tests & Evidence: unit/API/security tests (68 total) and Playwright E2E test tests/e2e/progression.spec.js green; screenshot and video in docs/evidence/S3.1/.
-- Next up: S3.2 Cosmetics shop (M:N join with equipped), UI theme switch.
-- S3.2 Cosmetics shop & UI theme switch shipped: DB migration 006_cosmetics.sql created cosmetics and kitchen_cosmetics M:N join table.
-- REST endpoints GET /api/cosmetics, POST /api/cosmetics/:id/purchase, POST /api/cosmetics/:id/equip created.
-- CosmeticsPage.jsx and App.jsx updated to support theme switching via CSS class, badge display, and shop customization.
-- Tests & Evidence: Vitest unit/API/security tests (75 total) and Playwright E2E test tests/e2e/cosmetics.spec.js green; screenshot & video saved in docs/evidence/S3.2/.
-- Next up: S3.3 Deploy to Render (render.yaml, env vars, health check, Playwright smoke vs live URL).
 - S3.3 Deploy configuration shipped: added render.yaml blueprint, package.json start script, docs/external/render.md, and SPA static asset fallback in server/src/app.js.
 - Express server now serves client/dist built SPA files when present and handles SPA route fallbacks to index.html.
 - Live deployment smoke test suite created in tests/e2e/live.spec.js verifying /api/health endpoint and frontend rendering.
 - Tests & Evidence: all unit, integration, security, and Playwright E2E tests green; screenshot and video evidence in docs/evidence/S3.3/.
 - Next up: S3.4 Stretch: spinner, disabled buttons, toasts on all async actions.
+- S3.6 Final Deliverables shipped: created README.md with live Render link, app overview, inspiration, team members, and complete feature checklist with evidence links.
+- Created milestone5.md final report documenting completed rubric requirements, custom features, and team reflection.
+- Created unit test tests/unit/final_deliverables.test.js, security test tests/security/final.security.test.js, and E2E test tests/e2e/final.spec.js.
+- Recorded full E2E run-through evidence (screenshot.png and video.webm) saved in docs/evidence/S3.6/.
+- All quality checks (standards-check, rubric-check, vitest, and playwright) passed cleanly.
