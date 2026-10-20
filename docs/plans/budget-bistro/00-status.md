@@ -34,7 +34,7 @@
 - [ ] S3.2 Cosmetics shop (M:N join with `equipped`), UI theme switch
 - [ ] S3.3 Deploy to Render (render.yaml, env vars, health check, Playwright smoke vs live URL)
 - [ ] S3.4 Stretch: spinner, disabled buttons, toasts on all async actions
-- [ ] S3.5 Endgame v1: Suppliers + Trust (M:N), VIP multi-constraint orders
+- [x] S3.5 Endgame v1: Suppliers + Trust (M:N), VIP multi-constraint orders
 - [ ] S3.6 Final: README feature checklist, per-feature GIFs, full run-through GIF, milestone5.md
 
 ### Sprint 4 (optional, only after S3.6 is green on Render)
@@ -111,3 +111,8 @@ Stretch (19)
 - Tests & Evidence: Playwright E2E test tests/e2e/modal.spec.js passing cleanly; screenshot and video saved in docs/evidence/S2.6/.
 - Quality & Verification: All Vitest unit/API/security tests pass (60 tests), standards-check and rubric-check pass cleanly.
 - Next up: S2.7 Graceful errors: API error middleware + React error boundary + toasts.
+- S3.5 Endgame v1 Suppliers + Trust (M:N) & VIP Orders shipped: Added suppliers table, kitchen_suppliers join table with trust score, and is_vip flag on customers/orders.
+- GET /api/suppliers endpoint exposes supplier trust and active category discounts (up to 25% OFF).
+- Serving 4+ star dishes awards supplier trust (+1 standard, +2 VIP), and VIP orders award 2x XP and higher budgets ($30-$50).
+- MarketPage renders Suppliers & Trust panel with active discounts; CookPage, OrderDetailModal, and App render 👑 VIP badges.
+- All 82 Vitest unit/API/security tests and 19 Playwright E2E tests passing cleanly; evidence saved to docs/evidence/S3.5/.

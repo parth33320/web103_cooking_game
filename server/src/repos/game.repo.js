@@ -45,13 +45,27 @@ export async function resetDatabase() {
       await client.query('DELETE FROM kitchen_cosmetics');
     }
 
+    const kitchenSuppliersTableCheck = await client.query(`
+      SELECT 1 FROM information_schema.tables WHERE table_name = 'kitchen_suppliers'
+    `);
+    if (kitchenSuppliersTableCheck.rows.length > 0) {
+      await client.query('DELETE FROM kitchen_suppliers');
+    }
+
+    const suppliersTableCheck = await client.query(`
+      SELECT 1 FROM information_schema.tables WHERE table_name = 'suppliers'
+    `);
+    if (suppliersTableCheck.rows.length > 0) {
+      await client.query('DELETE FROM suppliers');
+    }
+
     await client.query('DELETE FROM orders');
     await client.query('DELETE FROM customers');
     await client.query('DELETE FROM kitchens');
     await client.query('DELETE FROM players');
 
     // Reset primary key sequences across supported Postgres / pg-mem environments
-    const tablesWithSeq = ['players', 'kitchens', 'customers', 'orders', 'dishes'];
+    const tablesWithSeq = ['players', 'kitchens', 'customers', 'orders', 'dishes', 'suppliers'];
     for (const tbl of tablesWithSeq) {
       try {
         await client.query(`ALTER SEQUENCE ${tbl}_id_seq RESTART WITH 1`);
@@ -83,6 +97,27 @@ export async function resetDatabase() {
         `INSERT INTO kitchen_cosmetics (kitchen_id, cosmetic_id, equipped)
          VALUES ($1, 1, true), ($1, 5, true), ($1, 8, true)
          ON CONFLICT DO NOTHING`,
+        [kitchenRow.id]
+      );
+    }
+
+    // 2c. Seed default suppliers and supplier trust for starter kitchen
+    if (suppliersTableCheck.rows.length > 0) {
+      await client.query(`
+        INSERT INTO suppliers (id, name, category, discount_pct_per_trust, description) VALUES
+          (1, 'Prime Cuts Co.', 'protein', 5.00, 'Premium wholesale meat & seafood supplier'),
+          (2, 'Golden Grain Milling', 'carbs', 5.00, 'Organic grains, rice, and artisanal flour supplier'),
+          (3, 'Green Acres Farm', 'vegetable', 5.00, 'Fresh local produce & organic vegetable farm'),
+          (4, 'Pure Artisanal Oils', 'fat', 5.00, 'Cold-pressed oils, butter, and specialty fats supplier')
+        ON CONFLICT (id) DO NOTHING
+      `);
+    }
+
+    if (kitchenSuppliersTableCheck.rows.length > 0) {
+      await client.query(
+        `INSERT INTO kitchen_suppliers (kitchen_id, supplier_id, trust) VALUES
+           ($1, 1, 0), ($1, 2, 0), ($1, 3, 0), ($1, 4, 0)
+         ON CONFLICT (kitchen_id, supplier_id) DO NOTHING`,
         [kitchenRow.id]
       );
     }
@@ -226,7 +261,7 @@ export async function getGameState() {
     : null;
 
   const ordersRes = await pool.query(
-    `SELECT o.id, o.kitchen_id, o.customer_id, o.budget, o.target_protein_g, o.target_carbs_g, o.target_fat_g, o.status, c.name as customer_name
+    `SELECT o.id, o.kitchen_id, o.customer_id, o.budget, o.target_protein_g, o.target_carbs_g, o.target_fat_g, o.status, COALESCE(o.is_vip, false) as is_vip, c.name as customer_name
      FROM orders o
      JOIN customers c ON o.customer_id = c.id
      WHERE o.kitchen_id = $1 AND o.status = 'open'
@@ -244,6 +279,7 @@ export async function getGameState() {
     targetCarbsG: row.target_carbs_g,
     targetFatG: row.target_fat_g,
     status: row.status,
+    isVip: Boolean(row.is_vip),
   }));
 
   let activeEvents = [];
@@ -387,11 +423,12 @@ export async function processNextDay(kitchenId) {
           kitchenTier: currentTier,
           seed: orderSeed,
           ingredients,
+          allowVip: true,
         });
 
         const custRes = await client.query(
-          `INSERT INTO customers (name, job, diet, favorite_ingredient_id, blacklisted_ingredient_id)
-           VALUES ($1, $2, $3, $4, $5)
+          `INSERT INTO customers (name, job, diet, favorite_ingredient_id, blacklisted_ingredient_id, is_vip)
+           VALUES ($1, $2, $3, $4, $5, $6)
            RETURNING id`,
           [
             generated.customer.name,
@@ -399,13 +436,14 @@ export async function processNextDay(kitchenId) {
             generated.customer.diet,
             generated.customer.favoriteIngredientId,
             generated.customer.blacklistedIngredientId,
+            Boolean(generated.customer.isVip),
           ]
         );
         const customerId = custRes.rows[0].id;
 
         await client.query(
-          `INSERT INTO orders (kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, tolerance_pct, favorite_ingredient_id, blacklisted_ingredient_id, status)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'open')`,
+          `INSERT INTO orders (kitchen_id, customer_id, budget, target_protein_g, target_carbs_g, target_fat_g, tolerance_pct, favorite_ingredient_id, blacklisted_ingredient_id, status, is_vip)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'open', $10)`,
           [
             targetKitchenId,
             customerId,
@@ -416,6 +454,7 @@ export async function processNextDay(kitchenId) {
             generated.order.tolerancePct,
             generated.order.favoriteIngredientId,
             generated.order.blacklistedIngredientId,
+            Boolean(generated.order.isVip),
           ]
         );
       }

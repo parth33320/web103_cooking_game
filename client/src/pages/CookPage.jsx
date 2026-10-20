@@ -90,7 +90,25 @@ export function CookPage() {
       <h1>Cook Page</h1>
       {order && (
         <div style={{ border: '1px solid #ccc', padding: '1.25rem', borderRadius: '8px', marginBottom: '1.5rem', backgroundColor: '#fafafa' }}>
-          <h2 style={{ marginTop: 0 }}>Order #{order.id} for {order.customerName}</h2>
+          <h2 style={{ marginTop: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            Order #{order.id} for {order.customerName}
+            {order.isVip && (
+              <span
+                data-testid="vip-badge"
+                style={{
+                  backgroundColor: '#ffd700',
+                  color: '#000',
+                  fontSize: '0.8rem',
+                  fontWeight: 'bold',
+                  padding: '0.2rem 0.5rem',
+                  borderRadius: '12px',
+                  border: '1px solid #cca300',
+                }}
+              >
+                👑 VIP Order
+              </span>
+            )}
+          </h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '1rem' }}>
             <p><strong>Job:</strong> <span id="customer-job">{order.job}</span></p>
             <p><strong>Diet:</strong> <span id="customer-diet">{order.diet}</span></p>

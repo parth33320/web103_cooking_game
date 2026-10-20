@@ -315,8 +315,24 @@ export function AppContent() {
                   alignItems: 'center',
                 }}
               >
-                <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <strong>Order #{o.id}</strong> ({o.customerName || 'Customer'}) - Budget: ${o.budget?.toFixed(2)} | Target Protein: {o.targetProteinG}g
+                  {o.isVip && (
+                    <span
+                      data-testid={`vip-badge-card-${o.id}`}
+                      style={{
+                        backgroundColor: '#ffd700',
+                        color: '#000',
+                        fontSize: '0.75rem',
+                        fontWeight: 'bold',
+                        padding: '0.15rem 0.4rem',
+                        borderRadius: '10px',
+                        border: '1px solid #cca300',
+                      }}
+                    >
+                      👑 VIP
+                    </span>
+                  )}
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                   <button

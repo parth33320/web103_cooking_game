@@ -19,9 +19,44 @@ export async function createDish(orderId, lines, stars, reviewText = null, break
   try {
     await client.query('BEGIN');
 
-    // Get kitchen_id from order
-    const orderRes = await client.query('SELECT kitchen_id FROM orders WHERE id = $1', [orderId]);
-    const kitchenId = orderRes.rows[0]?.kitchen_id || 1;
+    // Get kitchen_id, is_vip, and favorite_ingredient_id from order
+    const orderRes = await client.query(
+      `SELECT o.kitchen_id, o.is_vip, COALESCE(o.favorite_ingredient_id, c.favorite_ingredient_id) as favorite_ingredient_id
+       FROM orders o
+       JOIN customers c ON o.customer_id = c.id
+       WHERE o.id = $1`,
+      [orderId]
+    );
+
+    const orderRow = orderRes.rows[0] || {};
+    const kitchenId = orderRow.kitchen_id || 1;
+    const isVip = Boolean(orderRow.is_vip);
+    const favoriteIngredientId = orderRow.favorite_ingredient_id;
+
+    // Supplier Trust update if dish scored 4+ stars
+    if (stars >= 4.0 && favoriteIngredientId) {
+      const ingRes = await client.query('SELECT category FROM ingredients WHERE id = $1', [favoriteIngredientId]);
+      if (ingRes.rows.length > 0) {
+        const category = ingRes.rows[0].category;
+        const trustBoost = isVip ? 2 : 1;
+
+        const ksTableCheck = await client.query(`
+          SELECT 1 FROM information_schema.tables WHERE table_name = 'kitchen_suppliers'
+        `);
+        if (ksTableCheck.rows.length > 0) {
+          const supplierRes = await client.query('SELECT id FROM suppliers WHERE category = $1 LIMIT 1', [category]);
+          if (supplierRes.rows.length > 0) {
+            await client.query(
+              `INSERT INTO kitchen_suppliers (kitchen_id, supplier_id, trust)
+               VALUES ($1, $2, $3)
+               ON CONFLICT (kitchen_id, supplier_id)
+               DO UPDATE SET trust = kitchen_suppliers.trust + EXCLUDED.trust, updated_at = CURRENT_TIMESTAMP`,
+              [kitchenId, supplierRes.rows[0].id, trustBoost]
+            );
+          }
+        }
+      }
+    }
 
     const dishRes = await client.query(
       `INSERT INTO dishes (order_id, kitchen_id, stars)
@@ -59,7 +94,8 @@ export async function createDish(orderId, lines, stars, reviewText = null, break
     const oldXp = parseInt(kitchenRow.xp || 0, 10);
     const oldTier = parseInt(kitchenRow.tier || 1, 10);
 
-    const xpGained = calculateXpForStars(stars);
+    const baseXpGained = calculateXpForStars(stars);
+    const xpGained = isVip ? baseXpGained * 2 : baseXpGained;
     const newXp = oldXp + xpGained;
     const tierCalc = calculateTier(newXp);
     const newTier = tierCalc.tier;
